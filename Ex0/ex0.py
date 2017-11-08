@@ -1,4 +1,6 @@
 import numpy as np
+import cv2
+import matplotlib.pyplot as plt
 
 # Task 1: Some numerical programming in python
 
@@ -26,8 +28,8 @@ def cartesian2polar2D(cartezPoints):
     return np.matrix(polarPoints)
 
 # Task 2: RGB to Grayscale conversion
-def convertRGB2Gray(img, converMethod ="Luminosity"):
-    grayImg = [[[]]]#np.empty(len(img), len(img[0]), 3)
+def convertRGB2Gray(img, converMethod = "Luminosity"):
+    image = np.copy(img)
     for i in range(0, len(img)):
         for j in range(0, len(img[i])):
             (R, G, B) = [int(value) for value in img[i][j]]
@@ -41,39 +43,60 @@ def convertRGB2Gray(img, converMethod ="Luminosity"):
                 val = (R + G + B) / 3.0
             else:
                 val = 0.21 * R + 0.72 * G + 0.07 * B
-            grayImg.append(createPixelWithValue(val))
-
-    grayImg = np.array(grayImg, dtype=float)
-    return grayImg
+            image[i][j] = createPixelWithValue(val)
+    return image
 
 # Task 3: RGB to YIQ color space conversion
 
 # 3 a
 def rgb2yiq(img):
-    yiqImg = np.empty((len(img), len(img[0]), 3), float)
+    image = np.copy(img)
     transformMatrix = np.array([[0.299, 0.587, 0.114],
                                 [0.596, -0.274, -0.322],
                                 [0.211, -0.523, 0.312]])
-    for i in range(0, len(img)):
-        for j in range(0, len(img[i])):
-            pixel = img[i][j]
-            val = np.dot(transformMatrix, pixel)
-            yiqImg[i][j] = val
-
-    return yiqImg
+    # for i in range(0, len(img)):
+    #     for j in range(0, len(img[i])):
+    #         pixel = img[i][j]
+    #         val = np.dot(transformMatrix, pixel)
+    #         image[i][j] = val
+    return image.dot(transformMatrix)
 
 def yiq2rgb(img):
-    rgbImg = np.empty((len(img), len(img[0]), 3), float)
-    transformMatrix = np.array([[1, 0.956, 0.621],
-                                [1, -0.272, -0.647],
-                                [1, -1.106, 1.703]])
+    image = np.copy(img)
+    transformMatrix = np.array([[0.299, 0.587, 0.114],
+                                [0.596, -0.274, -0.322],
+                                [0.211, -0.523, 0.312]])
+    transformMatrix = transformMatrix.transpose()
     for i in range(0, len(img)):
         for j in range(0, len(img[i])):
             pixel = img[i][j]
             val = np.dot(transformMatrix, pixel)
-            rgbImg[i][j] = val
-
-    return rgbImg
+            for k in range(0, 3):
+                if val[k] < 0:
+#                    print(0-val[k])
+                    val[k] = 0
+            image[i][j] = val
+    return image#.dot(transformMatrix)
 
 def createPixelWithValue(val):
-    return [val, val, val]
+    intval = int(val)
+    return [intval, intval, intval]
+
+def test_3(imageName):
+    img = cv2.imread(imageName);
+
+    # reorder from BGR to RGB
+    img = img[:, :, [2, 1, 0]]
+
+    # normalize to range [0 1]
+    img = np.float32(img)
+    img = img / 255
+
+    img_yiq = rgb2yiq(img)
+    img_rgb = yiq2rgb(img_yiq)
+
+    f, ((ax1, ax2)) = plt.subplots(1, 2, sharex='col')
+    ax1.imshow(img), ax1.set_title('Original RGB image')
+
+imageName = './Images/peppers.png'
+test_3(imageName)
