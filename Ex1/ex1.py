@@ -111,14 +111,13 @@ def calcError(k, centroids, probs, clusters):
     centroids is array that holds centroid gray value,
     propbs is array that holds the probability of getting each gray value (0-255),
     clusters is array that holds k arrays (for k centroids):
-        each sub array i will hold the pixels ([x][y][gray value]) that belong to cluster i.
+        each sub array i will hold the pixels gray value that belong to cluster i.
     """
     sum = 0
     for i in range(0, k):
         xs = clusters[i]
         for x in xs:
-            grayColor = x[2]
-            temp = probs[grayColor] * ((grayColor - centroids[i])**2)
+            temp = probs[x] * ((x - centroids[i])**2)
             sum += temp
     return sum
 
