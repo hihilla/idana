@@ -48,7 +48,7 @@ def optimalQuantizationImage(img, k):
 
     pixelsNum = np.size(img) / 3.0  # maybe because its gray there's no need to divide
 
-    epsilon = 0.003
+    epsilon = 0.05
 
     # choosing centroids
     centroids = np.random.randint(0, 256, k)
@@ -61,16 +61,21 @@ def optimalQuantizationImage(img, k):
     bounds = calcBounds(k, bounds, centroids)
     probs = calcProbs(pixelsNum, getImageHistogram(img))
     clusters = calcClusters(img, bounds, k)
+    you = 0
 
-    while calcError(k, centroids, probs, clusters) < epsilon:
+    while calcError(k, centroids, probs, clusters) < epsilon and you < 15:
+        print(calcError(k, centroids, probs, clusters))
+        print("hey")
+        print(you)
+        you += 1
         for i in range(0, len(centroids)):  # goes through all centroids
             newCentroid = 0
             sumOfProbsInRange = 0
             for grayVal in range(bounds[i], bounds[i + 1]):  # maybe +1 ? only cares about amounts, not
-                                                       # actual pixels!
+                                                            # actual pixels!
                 newCentroid += grayVal * probs[grayVal]
                 sumOfProbsInRange += probs[grayVal]
-            centroids[i] = int(newCentroid / sumOfProbsInRange)
+            centroids[i] = int(newCentroid / (sumOfProbsInRange + 1))
             centroids = np.sort(centroids)
         bounds = calcBounds(k, bounds, centroids)
         clusters = calcClusters(img, bounds, k)
@@ -78,10 +83,11 @@ def optimalQuantizationImage(img, k):
     newImage = np.copy(img)
 
     for pixel in np.nditer(newImage):
-        for cluster in range(0, len(clusters)):
+        for i in range(0, len(clusters)):
             if pixel in clusters[i]:
                 grayValue = centroids[i]
                 pixel = np.repeat(grayValue, 3)
+                break
 
     return newImage
 
@@ -91,12 +97,13 @@ def calcBounds(k, bounds, centroids):
     return bounds
 
 def calcClusters(image, bounds, k):
-    clusters = np.ndarray(shape=(k,))
+    clusters = np.empty((k, 0)).tolist()
     for pixel in np.nditer(image):
         for i in range(0, len(bounds) - 1):
-            if pixel > bounds[i] and pixel < bounds[i + 1]:
-                np.append(clusters[i], pixel)
+            if bounds[i] < pixel < bounds[i + 1]:
+                clusters[i].append(pixel)
                 break
+    
     return clusters
 
 def calcProbs(pixelsNum,appearances):
@@ -113,11 +120,11 @@ def calcError(k, centroids, probs, clusters):
     clusters is array that holds k arrays (for k centroids):
         each sub array i will hold the pixels gray value that belong to cluster i.
     """
-    sum = 0
+    sum = 0.0
     for i in range(0, k):
         xs = clusters[i]
         for x in xs:
-            temp = probs[x] * ((x - centroids[i])**2)
+            temp = float(probs[x] * ((x - centroids[i])**2))
             sum += temp
     return sum
 
@@ -214,24 +221,7 @@ def foo(imageName):
 
     ax1.imshow(img, cmap='gray'), ax1.set_title('Original')
     ax2.imshow(qImg, cmap='gray'), ax2.set_title('Quantized: 64')
-
-    qImg = optimalQuantizationImage(img, 16)
-    f, ((ax1, ax2)) = plt.subplots(1, 2, sharex='col', sharey='row')
-
-    ax1.imshow(img, cmap='gray'), ax1.set_title('Original')
-    ax2.imshow(qImg, cmap='gray'), ax2.set_title('Quantized: 16')
-
-    qImg = optimalQuantizationImage(img, 4)
-    f, ((ax1, ax2)) = plt.subplots(1, 2, sharex='col', sharey='row')
-
-    ax1.imshow(img, cmap='gray'), ax1.set_title('Original')
-    ax2.imshow(qImg, cmap='gray'), ax2.set_title('Quantized: 4')
-
-    qImg = optimalQuantizationImage(img, 2)
-    f, ((ax1, ax2)) = plt.subplots(1, 2, sharex='col', sharey='row')
-
-    ax1.imshow(img, cmap='gray'), ax1.set_title('Original')
-    ax2.imshow(qImg, cmap='gray'), ax2.set_title('Quantized: 2')
+    plt.show()
 
 
 imageName = './Images/cameraman.jpg'
