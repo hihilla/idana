@@ -45,22 +45,29 @@ def getSampledImageAtResolution(dim, pixelSize, k=2):
 # Task 2: Quantization
 def optimalQuantizationImage(img, k):
     image = cv2.imread(img)
-    pixelsNum = image.size / 3 #maybe because its gray there's no need to divide
+    pixelsNum = image.size / 3.0  # maybe because its gray there's no need to divide
 
     epsilon = 0.003
 
     # choosing centroids
-    Q = np.random.randint(0, 256, k)
-    Q = np.sort(Q)
+    centroids = np.random.randint(0, 256, k)
+    centroids = np.sort(centroids)
     # bounds the centroids: the middle between two adjacent centroids
-    bounds = np.zeros(k + 1, int) #there's a chance it should be float
-    for i in range(0, k + 1):
-        bounds[i] = (Q[i + 1] - Q[i]) / 2
+    bounds = np.zeros(k + 1, int)  # there's a chance it should be float
+    bounds[0] = 0
+    bounds[k] = 255
+    for i in range(1, k):
+        bounds[i] = (centroids[i + 1] - centroids[i]) / 2
 
     probs = calcProbs(pixelsNum, getImageHistogram(img))
-    while (calcError(k, Q, probs) < epsilon):
-        print("nothing")
-
+    while (calcError(k, centroids, probs) < epsilon):
+        for i in range(0, centroids.shape):  # goes through all centroids
+            newCentroid = 0
+            sumOfProbsInRange = 0
+            for x in range(bounds[i], bounds[i + 1]):  #  maybe +1 ?
+                newCentroid += x * probs[x]
+                sumOfProbsInRange += probs[x]
+            centroids[i] = newCentroid / sumOfProbsInRange
 
     return 0
 
