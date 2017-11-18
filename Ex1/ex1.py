@@ -45,24 +45,58 @@ def getSampledImageAtResolution(dim, pixelSize, k=2):
 # Task 2: Quantization
 def optimalQuantizationImage(img, k):
     image = cv2.imread(img)
-    pixelsNum = image.size / 3 #maybe because its gray there's no need to divide
+    pixelsNum = image.size / 3.0  # maybe because its gray there's no need to divide
 
     epsilon = 0.003
 
     # choosing centroids
-    Q = np.random.randint(0, 256, k)
-    Q = np.sort(Q)
+    centroids = np.random.randint(0, 256, k)
+    centroids = np.sort(centroids)
+
     # bounds the centroids: the middle between two adjacent centroids
-    bounds = np.zeros(k + 1, int) #there's a chance it should be float
-    for i in range(0, k + 1):
-        bounds[i] = (Q[i + 1] - Q[i]) / 2
-
+    bounds = np.zeros(k + 1, int)  # there's a chance it should be float
+    bounds[0] = 0
+    bounds[k] = 255
+    bounds = calcBounds(k, bounds, centroids)
     probs = calcProbs(pixelsNum, getImageHistogram(img))
-    while (calcError(k, Q, probs) < epsilon):
-        print("nothing")
+    clusters = calcClusters(image, bounds)
 
+    while calcError(k, centroids, probs, clusters) < epsilon:
+        for i in range(0, len(centroids)):  # goes through all centroids
+            newCentroid = 0
+            sumOfProbsInRange = 0
+            for grayVal in range(bounds[i], bounds[i + 1]):  # maybe +1 ? only cares about amounts, not
+                                                       # actual pixels!
+                newCentroid += grayVal * probs[grayVal]
+                sumOfProbsInRange += probs[grayVal]
+            centroids[i] = int(newCentroid / sumOfProbsInRange)
+            centroids = np.sort(centroids)
+        bounds = calcBounds(k, bounds, centroids)
+        clusters = calcClusters(image, bounds)
 
-    return 0
+    newImage = np.copy(image)
+
+    for pixel in np.nditer(newImage):
+        for cluster in range(0, len(clusters)):
+            if pixel in clusters[i]:
+                grayValue = centroids[i]
+                pixel = np.repeat(grayValue, 3)
+
+    return newImage
+
+def calcBounds(k, bounds, centroids):
+    for i in range(1, k):
+        bounds[i] = int((centroids[i - 1] + centroids[i]) / 2.0)
+    return bounds
+
+def calcClusters(image, bounds):
+    clusters = np.array([[]])
+    for pixel in np.nditer(image):
+        for i in range(0, bounds.shape):
+            if pixel[:, :, 0] > bounds[i] and pixel[:, :, 0] < bounds[i + 1]:
+                np.append(clusters[i], pixel)
+                break
+    return clusters
 
 def calcProbs(pixelsNum,appearances):
     probs = np.zeros(256, float)
