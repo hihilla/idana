@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+import matplotlib.pyplot as plt
 
 # Task 1: Spatial sampling
 def getSampledImageAtResolution(dim, pixelSize, k=2):
@@ -44,8 +45,8 @@ def getSampledImageAtResolution(dim, pixelSize, k=2):
 
 # Task 2: Quantization
 def optimalQuantizationImage(img, k):
-    image = cv2.imread(img)
-    pixelsNum = image.size / 3.0  # maybe because its gray there's no need to divide
+
+    pixelsNum = np.size(img) / 3.0  # maybe because its gray there's no need to divide
 
     epsilon = 0.003
 
@@ -59,7 +60,7 @@ def optimalQuantizationImage(img, k):
     bounds[k] = 255
     bounds = calcBounds(k, bounds, centroids)
     probs = calcProbs(pixelsNum, getImageHistogram(img))
-    clusters = calcClusters(image, bounds)
+    clusters = calcClusters(img, bounds)
 
     while calcError(k, centroids, probs, clusters) < epsilon:
         for i in range(0, len(centroids)):  # goes through all centroids
@@ -72,9 +73,9 @@ def optimalQuantizationImage(img, k):
             centroids[i] = int(newCentroid / sumOfProbsInRange)
             centroids = np.sort(centroids)
         bounds = calcBounds(k, bounds, centroids)
-        clusters = calcClusters(image, bounds)
+        clusters = calcClusters(img, bounds)
 
-    newImage = np.copy(image)
+    newImage = np.copy(img)
 
     for pixel in np.nditer(newImage):
         for cluster in range(0, len(clusters)):
@@ -204,3 +205,36 @@ def f(grayVal, imgSize, histogram):
     cdfMin, _ = findMinMaxValues(cdf)
     # imgSize = np.size(img) / 3.0
     return int(255.0 * (cdf[grayVal] - cdfMin) / (imgSize - 1))
+
+
+def test_2(imageName):
+    img = cv2.imread(imageName)
+
+    qImg = optimalQuantizationImage(img, 64)
+    f, ((ax1, ax2)) = plt.subplots(1, 2, sharex='col', sharey='row')
+
+    ax1.imshow(img, cmap='gray'), ax1.set_title('Original')
+    ax2.imshow(qImg, cmap='gray'), ax2.set_title('Quantized: 64')
+
+    qImg = optimalQuantizationImage(img, 16)
+    f, ((ax1, ax2)) = plt.subplots(1, 2, sharex='col', sharey='row')
+
+    ax1.imshow(img, cmap='gray'), ax1.set_title('Original')
+    ax2.imshow(qImg, cmap='gray'), ax2.set_title('Quantized: 16')
+
+    qImg = optimalQuantizationImage(img, 4)
+    f, ((ax1, ax2)) = plt.subplots(1, 2, sharex='col', sharey='row')
+
+    ax1.imshow(img, cmap='gray'), ax1.set_title('Original')
+    ax2.imshow(qImg, cmap='gray'), ax2.set_title('Quantized: 4')
+
+    qImg = optimalQuantizationImage(img, 2)
+    f, ((ax1, ax2)) = plt.subplots(1, 2, sharex='col', sharey='row')
+
+    ax1.imshow(img, cmap='gray'), ax1.set_title('Original')
+    ax2.imshow(qImg, cmap='gray'), ax2.set_title('Quantized: 2')
+
+
+imageName = './Images/cameraman.jpg'
+test_2(imageName)
+
