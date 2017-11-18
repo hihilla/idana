@@ -1,4 +1,3 @@
-import cv2
 import numpy as np
 import cv2
 
@@ -30,20 +29,17 @@ def getSampledImageAtResolution(dim, pixelSize, k=2):
     Y = np.multiply(2, Y)
 
     Xs, Ys = np.meshgrid(X, Y)
-    print("======")
-    print(Xs + Ys)
-    print("======")
     return np.cos(k * np.pi * (Xs + Ys))
 
-def analyticFunction(x, y, k):
-    x = np.multiply(3, x)
-    y = np.multiply(2, y)
-
-    tempMatrix = np.add(x, y)
-
-    tempParam = k * np.pi
-    tempMatrix = np.multiply(tempParam, tempMatrix)
-    return np.cos(tempMatrix)
+# def analyticFunction(x, y, k):
+#     x = np.multiply(3, x)
+#     y = np.multiply(2, y)
+#
+#     tempMatrix = np.add(x, y)
+#
+#     tempParam = k * np.pi
+#     tempMatrix = np.multiply(tempParam, tempMatrix)
+#     return np.cos(tempMatrix)
 
 
 # Task 2: Quantization
@@ -53,29 +49,20 @@ def optimalQuantizationImage(img, k):
 
     epsilon = 0.003
 
+    # choosing centroids
     Q = np.random.randint(0, 256, k)
     Q = np.sort(Q)
-
+    # bounds the centroids: the middle between two adjacent centroids
     bounds = np.zeros(k + 1, int) #there's a chance it should be float
     for i in range(0, k + 1):
         bounds[i] = (Q[i + 1] - Q[i]) / 2
 
-    probs = calcProbs(pixelsNum, countApperances(img))
+    probs = calcProbs(pixelsNum, getImageHistogram(img))
     while (calcError(k, Q, probs) < epsilon):
-
+        print("nothing")
 
 
     return 0
-
-#gets the image, returns array with # of appearances of each pixel [0-255]
-def countApperances(img):
-    numericalVal = cv2.imread(img)
-    appearances = np.zeros(256, int)
-
-    for x in np.nditer(numericalVal):
-        appearances[x] += 1
-
-    return appearances
 
 def calcProbs(pixelsNum,appearances):
     probs = np.zeros(256, float)
@@ -91,11 +78,12 @@ def calcError(k, centroids, probs):
 # Task 3: Image histograms
 # a
 def getImageHistogram(img):
-    histogram = np.zeros(shape=(256))
-    for i in range(0, len(img)):
-        for j in range(0, len(img[0])):
-            index = img[i][j][0]
-            histogram[index] += 1
+    numericalVal = img[:,:,0]
+    print(numericalVal)
+    histogram = np.zeros(256, int)
+
+    for x in np.nditer(numericalVal):
+        histogram[x] += 1
     return histogram
 
 # b
@@ -103,11 +91,12 @@ def getConstrastStrechedImage(grayImg):
     histogram = getImageHistogram(grayImg)
     minVal, maxVal = findMinMaxValues(histogram)
     img = np.copy(grayImg)
-    for i in range(0, len(grayImg)):
-        for j in range(0, len(grayImg[0])):
-            val = grayImg[i][j][0]
-            newVal = linearEnhancementOf(val, minVal, maxVal)
-            img[i][j] = getGrayPixel(newVal)
+    img = linearEnhancementOf(img[:,:,0], minVal, maxVal)
+    # for i in range(0, len(grayImg)):
+    #     for j in range(0, len(grayImg[0])):
+    #         val = grayImg[i][j][0]
+    #         newVal = linearEnhancementOf(val, minVal, maxVal)
+    #         img[i][j] = getGrayPixel(newVal)
     return img
 
 def findMinMaxValues(histogram):
