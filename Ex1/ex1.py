@@ -1,6 +1,4 @@
 import numpy as np
-import cv2
-import matplotlib.pyplot as plt
 
 # Task 1: Spatial sampling
 def getSampledImageAtResolution(dim, pixelSize, k=2):
@@ -12,24 +10,12 @@ def getSampledImageAtResolution(dim, pixelSize, k=2):
     numXPixels = int(float(x1 - x0) / pixelSize)
     numYPixels = int(float(y1 - y0) / pixelSize)
 
-    X = []
-    Y = []
-
-    for i in range(0, numXPixels):
-        val = x0 + (i * pixelSize)
-        X.append(val)
-
-    X = np.array(X, float)
-    X = np.multiply(3, X)
-
-    for i in range(0, numYPixels):
-        val = y0 + (i * pixelSize)
-        Y.append(val)
-
-    Y = np.array(Y, float)
-    Y = np.multiply(2, Y)
+    X = np.linspace(dim[0], dim[1], numXPixels)
+    Y = np.linspace(dim[0], dim[1], numYPixels)
 
     Xs, Ys = np.meshgrid(X, Y)
+    Xs = np.multiply(3.0, Xs)
+    Ys = np.multiply(2.0, Ys)
     return np.cos(k * np.pi * (Xs + Ys))
 
 # Task 2: Quantization
