@@ -60,7 +60,7 @@ def optimalQuantizationImage(img, k):
     bounds[k] = 255
     bounds = calcBounds(k, bounds, centroids)
     probs = calcProbs(pixelsNum, getImageHistogram(img))
-    clusters = calcClusters(img, bounds)
+    clusters = calcClusters(img, bounds, k)
 
     while calcError(k, centroids, probs, clusters) < epsilon:
         for i in range(0, len(centroids)):  # goes through all centroids
@@ -73,7 +73,7 @@ def optimalQuantizationImage(img, k):
             centroids[i] = int(newCentroid / sumOfProbsInRange)
             centroids = np.sort(centroids)
         bounds = calcBounds(k, bounds, centroids)
-        clusters = calcClusters(img, bounds)
+        clusters = calcClusters(img, bounds, k)
 
     newImage = np.copy(img)
 
@@ -90,18 +90,18 @@ def calcBounds(k, bounds, centroids):
         bounds[i] = int((centroids[i - 1] + centroids[i]) / 2.0)
     return bounds
 
-def calcClusters(image, bounds):
-    clusters = np.array([[]])
+def calcClusters(image, bounds, k):
+    clusters = np.ndarray(shape=(k,))
     for pixel in np.nditer(image):
-        for i in range(0, bounds.shape):
-            if pixel[:, :, 0] > bounds[i] and pixel[:, :, 0] < bounds[i + 1]:
+        for i in range(0, len(bounds) - 1):
+            if pixel > bounds[i] and pixel < bounds[i + 1]:
                 np.append(clusters[i], pixel)
                 break
     return clusters
 
 def calcProbs(pixelsNum,appearances):
     probs = np.zeros(256, float)
-    for i in range(0, appearances):
+    for i in range(0, len(appearances)):
         probs[i] = appearances[i] / pixelsNum
 
     return probs
@@ -207,7 +207,7 @@ def f(grayVal, imgSize, histogram):
     return int(255.0 * (cdf[grayVal] - cdfMin) / (imgSize - 1))
 
 
-def test_2(imageName):
+def foo(imageName):
     img = cv2.imread(imageName)
 
     qImg = optimalQuantizationImage(img, 64)
@@ -236,5 +236,5 @@ def test_2(imageName):
 
 
 imageName = './Images/cameraman.jpg'
-test_2(imageName)
+foo(imageName)
 
