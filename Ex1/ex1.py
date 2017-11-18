@@ -32,17 +32,6 @@ def getSampledImageAtResolution(dim, pixelSize, k=2):
     Xs, Ys = np.meshgrid(X, Y)
     return np.cos(k * np.pi * (Xs + Ys))
 
-# def analyticFunction(x, y, k):
-#     x = np.multiply(3, x)
-#     y = np.multiply(2, y)
-#
-#     tempMatrix = np.add(x, y)
-#
-#     tempParam = k * np.pi
-#     tempMatrix = np.multiply(tempParam, tempMatrix)
-#     return np.cos(tempMatrix)
-
-
 # Task 2: Quantization
 def optimalQuantizationImage(img, k):
 
@@ -172,7 +161,6 @@ def getGrayPixel(val):
 # c
 def getHistEqImage(img):
     # Compute a scaling factor, α= 255 / num of pixels
-    shape = np.shape(img)
     numOfPixels = np.size(img) / 3.0
     a = 255.0 / numOfPixels
 
@@ -180,37 +168,21 @@ def getHistEqImage(img):
     histogram = getImageHistogram(img)
 
     # Create a look up table
+    # LUT is Cb^-1
     LUT = np.zeros(256)
-    # LUT[0] =  α * histogram[0]
     LUT[0] = a * histogram[0]
-
     # for all remaining grey levels: LUT[i] = LUT[i-1] + α * histogram[i]
     for i in range(1, 256):
-        val = LUT[i - 1] + a * histogram[i]
+        val = LUT[i - 1] + int(a * histogram[i])
         LUT[i] = val
 
-    # for all pixel coordinates: g(x, y) = LUT[f(x, y)]
-    image = np.copy(img)
+    # for all pixel coordinates: g(x, y) = LUT[f(x, y)] (g - new img, f - old img)
+    newImg = np.copy(img)
     for x, y, _ in np.ndindex(img.shape):
         grayVal = img[x][y][0]
-        val = LUT[f(grayVal, numOfPixels, histogram)]
-        image[x][y] = val
-    return image
-
-def getCumulativeDistribution(histogram):
-    cdf = np.copy(histogram)
-    # cdf.append(histogram[0])
-    for i in range(1, 256):
-        c = cdf[i - 1] + histogram[i]
-        cdf[i] = c
-    return np.array(cdf)
-
-def f(grayVal, imgSize, histogram):
-    # v = img[x][y][0] # gray value
-    cdf = getCumulativeDistribution(histogram)
-    cdfMin, _ = findMinMaxValues(cdf)
-    # imgSize = np.size(img) / 3.0
-    return int(255.0 * (cdf[grayVal] - cdfMin) / (imgSize - 1))
+        val = LUT[grayVal]
+        newImg[x][y] = val
+    return newImg
 
 
 def foo(imageName):
@@ -226,4 +198,5 @@ def foo(imageName):
 
 imageName = './Images/cameraman.jpg'
 foo(imageName)
+
 
