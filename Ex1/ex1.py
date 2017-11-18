@@ -92,7 +92,6 @@ def calcError(k, centroids, probs, clusters):
 def getImageHistogram(img):
     numericalVal = img[:,:,0]
     histogram = np.zeros(256, int)
-
     for x in np.nditer(numericalVal):
         histogram[x] += 1
     return histogram
@@ -103,11 +102,10 @@ def getConstrastStrechedImage(grayImg):
     minVal, maxVal = findMinMaxValues(histogram)
     img = np.copy(grayImg)
 
-    for i in range(0, len(grayImg)):
-        for j in range(0, len(grayImg[0])):
-            val = grayImg[i][j][0]
-            newVal = linearEnhancementOf(val, minVal, maxVal)
-            img[i][j] = getGrayPixel(newVal)
+    for x, y, _ in np.ndindex(grayImg.shape):
+        val = grayImg[x][y][0]
+        newVal = linearEnhancementOf(val, minVal, maxVal)
+        img[x][y] = getGrayPixel(newVal)
     return img
 
 def findMinMaxValues(histogram):
@@ -127,7 +125,8 @@ def linearEnhancementOf(val, minVal, maxVal):
     return (val - minVal) * 255.0 / float(maxVal - minVal)
 
 def getGrayPixel(val):
-    return [val, val, val]
+    val = val if val < 256 else 255
+    return np.repeat(val, 3)
 
 # c
 def getHistEqImage(img):
@@ -140,34 +139,34 @@ def getHistEqImage(img):
     histogram = getImageHistogram(img)
 
     # Create a look up table
-    LUT = []
+    LUT = np.zeros(256)
     # LUT[0] =  α * histogram[0]
-    LUT.append(a * histogram[0])
+    LUT[0] = a * histogram[0]
 
     # for all remaining grey levels: LUT[i] = LUT[i-1] + α * histogram[i]
     for i in range(1, 256):
         val = LUT[i - 1] + a * histogram[i]
-        LUT.append(val)
+        LUT[i] = val
 
     # for all pixel coordinates: g(x, y) = LUT[f(x, y)]
     image = np.copy(img)
-    for x in range(0, shape[0]):
-        for y in range(0, shape[1]):
-            val = LUT[f(x, y, img, histogram)]
-            image[x][y] = val
+    for x, y, _ in np.ndindex(img.shape):
+        grayVal = img[x][y][0]
+        val = LUT[f(grayVal, numOfPixels, histogram)]
+        image[x][y] = val
     return image
 
 def getCumulativeDistribution(histogram):
-    cdf = []
-    cdf.append(histogram[0])
+    cdf = np.copy(histogram)
+    # cdf.append(histogram[0])
     for i in range(1, 256):
         c = cdf[i - 1] + histogram[i]
-        cdf.append(c)
+        cdf[i] = c
     return np.array(cdf)
 
-def f(x, y, img, histogram):
-    v = img[x][y][0]
+def f(grayVal, imgSize, histogram):
+    # v = img[x][y][0] # gray value
     cdf = getCumulativeDistribution(histogram)
     cdfMin, _ = findMinMaxValues(cdf)
-    imgSize = np.size(img) / 3.0
-    return int(255.0 * (cdf[v] - cdfMin) / (imgSize - 1))
+    # imgSize = np.size(img) / 3.0
+    return int(255.0 * (cdf[grayVal] - cdfMin) / (imgSize - 1))
