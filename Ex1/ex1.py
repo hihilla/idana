@@ -78,15 +78,26 @@ def calcProbs(pixelsNum,appearances):
 
     return probs
 
-def calcError(k, centroids, probs):
-
-    return 0
+def calcError(k, centroids, probs, clusters):
+    """k is number of centroids,
+    centroids is array that holds centroid gray value,
+    propbs is array that holds the probability of getting each gray value (0-255),
+    clusters is array that holds k arrays (for k centroids):
+        each sub array i will hold the pixels ([x][y][gray value]) that belong to cluster i.
+    """
+    sum = 0
+    for i in range(0, k):
+        xs = clusters[i]
+        for x in xs:
+            grayColor = x[2]
+            temp = probs[grayColor] * ((grayColor - centroids[i])**2)
+            sum += temp
+    return sum
 
 # Task 3: Image histograms
 # a
 def getImageHistogram(img):
     numericalVal = img[:,:,0]
-    print(numericalVal)
     histogram = np.zeros(256, int)
 
     for x in np.nditer(numericalVal):
@@ -98,12 +109,12 @@ def getConstrastStrechedImage(grayImg):
     histogram = getImageHistogram(grayImg)
     minVal, maxVal = findMinMaxValues(histogram)
     img = np.copy(grayImg)
-    img = linearEnhancementOf(img[:,:,0], minVal, maxVal)
-    # for i in range(0, len(grayImg)):
-    #     for j in range(0, len(grayImg[0])):
-    #         val = grayImg[i][j][0]
-    #         newVal = linearEnhancementOf(val, minVal, maxVal)
-    #         img[i][j] = getGrayPixel(newVal)
+
+    for i in range(0, len(grayImg)):
+        for j in range(0, len(grayImg[0])):
+            val = grayImg[i][j][0]
+            newVal = linearEnhancementOf(val, minVal, maxVal)
+            img[i][j] = getGrayPixel(newVal)
     return img
 
 def findMinMaxValues(histogram):
@@ -129,7 +140,8 @@ def getGrayPixel(val):
 def getHistEqImage(img):
     # Compute a scaling factor, α= 255 / num of pixels
     shape = np.shape(img)
-    a = 255.0 / (shape[0] * shape[1])
+    numOfPixels = np.size(img) / 3.0
+    a = 255.0 / numOfPixels
 
     # Calculate histogram of the image
     histogram = getImageHistogram(img)
@@ -153,11 +165,6 @@ def getHistEqImage(img):
     return image
 
 def getCumulativeDistribution(histogram):
-    P = []
-    for i in range(0, 256):
-        p = histogram[i] / 255.0
-        P.append(p)
-
     cdf = []
     cdf.append(histogram[0])
     for i in range(1, 256):
@@ -169,5 +176,5 @@ def f(x, y, img, histogram):
     v = img[x][y][0]
     cdf = getCumulativeDistribution(histogram)
     cdfMin, _ = findMinMaxValues(cdf)
-    M, N, _ = np.shape(img)
-    return int(255.0 * (cdf[v] - cdfMin) / ((M * N) - 1))
+    imgSize = np.size(img) / 3.0
+    return int(255.0 * (cdf[v] - cdfMin) / (imgSize - 1))
