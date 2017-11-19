@@ -195,14 +195,14 @@ def getHistEqImage(img):
     LUT[0] = a * histogram[0]
     # for all remaining grey levels: LUT[i] = LUT[i-1] + α * histogram[i]
     for i in range(1, 256):
-        val = LUT[i - 1] + int(a * histogram[i])
-        LUT[i] = val
+        val = LUT[i - 1] + (a * histogram[i])
+        LUT[i] = int(val)
 
     # for all pixel coordinates: g(x, y) = LUT[f(x, y)] (g - new img, f - old img)
     newImg = np.copy(img)
     for x, y, _ in np.ndindex(img.shape):
         grayVal = img[x][y][0]
         val = LUT[grayVal]
-        newImg[x][y] = getGrayPixel(val)
+        newImg[x][y] = getGrayPixel(int(val))
     return newImg
 
