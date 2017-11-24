@@ -1,4 +1,6 @@
 # Task 1: Geometrical transformations
+def getAffineTransformation(pts1,pts2):
+    return 0
 
 def applyAffineTransToImage(img, affineT):
     return 0
