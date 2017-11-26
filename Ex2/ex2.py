@@ -130,15 +130,36 @@ def multipleSegmentDefromation(img, Qs, Ps, Qt, Pt, p, b):
     """
     # should use the bilinear interpolation you implemented in 1.b.
     # use the bi-linear interpolation implemented in 1.b.
-    P = [Ps, Pt]
-    Q = [Qs, Qt]
-    # The influence of each segments
-    W = np.array((2,), dtype=float)
-    for y, x, _ in np.ndindex(img.shape):
+    a = 0.0001
+    newImg = np.zeros(img.shape)
+    for y, x in np.ndindex(img.shape):
         R = (x, y)
+        weightR = 0
+        weights = 0
+        for i in range(0, len(Qs)):
+            # print(Qs[i], Ps[i], Qt[i], Pt[i])
+            Pi = Ps[i]
+            Qi = Qs[i]
+            u = (Qi - Pi) / (np.linalg.norm(Qi - Pi))
+            v = np.array([u[1], -u[0]])
 
+            alpha = u * (R - Pi) / np.linalg.norm((Qi - Pi))
+            beita = (R - Pi) * v
 
-    return 0
+            ut = (Qt[i] - Pt[i]) / (np.linalg.norm(Qt[i] - Pt[i]))
+            vt = np.array([ut[1], -ut[0]])
+
+            Rti = Pt[i] + alpha * np.linalg.norm(Qt[i] - Pt[i]) * ut + beita * vt
+            Wi = np.power((np.power((np.abs(Qi - Pi)), p) / (a + beita)), b)
+            weights += Wi
+            weightR += (Wi * Rti)
+            # Rt=Rti
+
+        Rt = weightR / weights
+
+        newImg[int(Rt[1])][int(Rt[0])] = bilinearInterpolation(x, y, img)
+
+    return newImg
 
 # Task 2: Image Gradients
 
