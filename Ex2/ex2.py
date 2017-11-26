@@ -147,7 +147,10 @@ def imGradSobel(img):
             #     Gy[i, j] = 255
             #
 
-    toReturn = np.around(np.sqrt(Gx**2 + Gy**2))
-    print(toReturn)
+    temp = np.around(np.sqrt(Gx**2 + Gy**2))
+    # deletes padding
+    temp = np.delete(temp, (0, 1, x-1, x-2), axis=0)
+    temp = np.delete(temp, (0, 1, x-1, x-2), axis=1)
+    print(temp)
     print("%%%%%%%%%%%%%%%%%")
-    return Gx, Gy, toReturn
+    return Gx, Gy, temp
