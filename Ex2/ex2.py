@@ -100,5 +100,54 @@ def multipleSegmentDefromation(img, Qs, Ps, Qt, Pt, p, b):
 # Task 2: Image Gradients
 
 def imGradSobel(img):
+    #  copies the image to Gx and Gy , padded with double layer of 0's
+    newImage = np.copy(img)
+    Gx = np.pad(newImage, 2, 'constant', constant_values=0)
+    Gy = np.copy(Gx)
+    temp = Gx.shape
+    x = temp[0]
+    y = temp[1]
 
-    return 0
+    horizonalChangeCol = np.array([1, 2, 1])
+    horizonalChangeRow = np.array([1, 0, -1])
+    changeHorizontal = np.array([[-1, 0, 1],
+                                 [-2, 0, 2],
+                                 [-1, 0, 1]])
+
+    #  these are just for comfort, can be deleted
+    verticalChangeCol = np.array([1, 0, -1])
+    verticalChangeRow = np.array([1, 2, 1])
+    changeVertical = np.array([[1, 2, 1],
+                               [0, 0 , 0],
+                              [-1, -2, -1]])
+
+    for i in range(2, x - 2):
+        for j in range(2, y - 2):
+            toBeChangedGx = np.array([[Gx.item((i-1, j-1)), Gx.item((i, j-1)), Gx.item((i+1, j-1))],
+                                   [Gx.item((i-1,j)), Gx.item((i, j)), Gx.item((i+1, j))],
+                                   [Gx.item((i-1, j+1)), Gx.item((i, j+1)), Gx.item((i+1, j+1))]])
+            toBeChangedGy = np.array([[Gy.item((i-1, j-1)), Gy.item((i, j-1)), Gy.item((i+1, j-1))],
+                                   [Gy.item((i-1, j)), Gy.item((i, j)), Gy.item((i+1, j))],
+                                   [Gy.item((i-1, j+1)), Gy.item((i, j+1)), Gy.item((i+1, j+1))]])
+            temp = np.dot(changeHorizontal, toBeChangedGx)
+            Gx[i, j] = np.sum(temp)
+            # if i == 100 and j == 100:
+            #     print(toBeChangedGx)
+            #     print(temp)
+            #     print(Gx[i, j])
+            # if Gx[i, j] < 0:
+            #     Gx[i, j] = 0
+            # if Gx[i, j] > 255:
+            #     Gx[i, j] = 255
+            temp = np.dot(changeVertical, toBeChangedGy)
+            Gy[i, j] = temp[1, 1]
+            # if Gy[i, j] < 0:
+            #     Gy[i, j] = 0
+            # if Gy[i, j] > 255:
+            #     Gy[i, j] = 255
+            #
+
+    toReturn = np.around(np.sqrt(Gx**2 + Gy**2))
+    print(toReturn)
+    print("%%%%%%%%%%%%%%%%%")
+    return Gx, Gy, toReturn
