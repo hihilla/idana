@@ -1,5 +1,5 @@
 import numpy as np
-from numpy import linalg as ling
+from numpy import linalg as lg
 
 
 # Task 1: Geometrical transformations
@@ -8,9 +8,6 @@ def getAffineTransformation(pts1, pts2):
     :param: pts1,pts2 - at least 3 pairs of matched points between images A and B
     :return: an affine transformation from image A to image B
     """
-    # built-in numpy method for finding the least-squares solution for
-    # linear systems using Singular Value Decomposition (SVD)
-    # https://docs.scipy.org/doc/numpy-1.13.0/reference/generated/numpy.linalg.lstsq.html
     bpts2 = np.hstack(pts2)
     # create arrays xi, yi, zeros, ones
     arrayType = pts1.dtype
@@ -41,7 +38,8 @@ def getAffineTransformation(pts1, pts2):
     m5[1::2] = ones
     M = np.column_stack((m0, m1, m2, m3, m4, m5))
 
-    [a, b, c, d, tx, ty] = np.linalg.lstsq(M, bpts2)[0]
+    # solve linear equation
+    [a, b, c, d, tx, ty] = lg.lstsq(M, bpts2)[0]
     affineT = np.array([[a, b, tx],
                         [c, d, ty],
                         [0, 0, 1]],
@@ -95,14 +93,14 @@ def bilinearInterpolation(img, x, y):
 
 
 def singleSegmentationDeformation(Rt, Qt, Pt, Qs, Ps):
-    normQPt = np.linalg.norm(Qt - Pt)
+    normQPt = lg.norm(Qt - Pt)
     ut = (Qt - Pt) / normQPt
     vt = np.array([ut[1], -ut[0]])
 
     alpha = np.dot((Rt - Pt), ut) / normQPt
     beita = np.dot((Rt - Pt), vt)
 
-    normQPs = np.linalg.norm(Qs - Ps)
+    normQPs = lg.norm(Qs - Ps)
     u = (Qs - Ps) / normQPs
     v = np.array([u[1], -u[0]])
 
@@ -116,22 +114,27 @@ def multipleSegmentDefromation(img, Qs, Ps, Qt, Pt, p, b):
     newImg = np.zeros(img.shape)
     for y, x in np.ndindex(img.shape):
         Rt = np.array([x, y])
-        sum1 = 0
-        sum2 = 0
+        sum1 = 0  # will hold sum of Wi*Ri for all i
+        sum2 = 0  # will hold sum of Wi for all i
+        
         for i in range(0, len(Qs)):
             Ri, beita = singleSegmentationDeformation(Rt, Qt[i], Pt[i],
                                                       Qs[i], Ps[i])
             temp = np.abs(Qs[i] - Ps[i])
+            temp = lg.norm(temp)
             temp = np.power(temp, p)
-            temp /= (a + beita)
+
+            temp /= (a + np.abs(beita))
             wi = np.power(temp, b)
-            sum1 += (wi * Ri)
+
+            sum1 += (Ri * wi)
             sum2 += wi
 
+        # final mapping
         R = sum1 / sum2
-        R = np.asarray(R, int)
-        val = bilinearInterpolation(img, x, y)
-        newImg[R[1], R[0]] = val
+        # bilinear interpolation to get pixel value
+        val = bilinearInterpolation(img, R[0], R[1])
+        newImg[y][x] = val
     return newImg
 
 
