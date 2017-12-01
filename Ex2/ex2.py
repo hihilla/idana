@@ -1,4 +1,5 @@
 import numpy as np
+from numpy import linalg as ling
 
 # Task 1: Geometrical transformations
 def getAffineTransformation(pts1,pts2):
@@ -182,10 +183,12 @@ def imGradSobel(img):
         for j in range(0, cols):
             currVector = np.array([Gx[i - 1, j], Gx[i, j], Gx[i + 1, j]])
             newVal = np.dot(currVector, kernelRow)
-            if newVal < 0:
-                newVal = 0
-            elif newVal > 255:
-                newVal = 255
+            # print("hey")
+            # print(newVal)
+            # if newVal < 0:
+            #     newVal = 0
+            # elif newVal > 255:
+            #     newVal = 255
             Gx[i, j] = newVal
     # same for cols in Gy matrix
     for j in range(1, cols - 1):
@@ -203,14 +206,7 @@ def imGradSobel(img):
 
     Gx = np.matrix(Gx)
     Gy = np.matrix(Gy)
-    magnitude = Gx + Gy
-
+    # magnitude = np.sqrt(np.power(Gx, 2) + np.power(Gy, 2))
+    Gx = ling.matrix_power(Gx, 2)
+    magnitude = (Gx + Gy)
     return Gx, Gy, magnitude
-
-
-
-
-
-
-
-    return 0
