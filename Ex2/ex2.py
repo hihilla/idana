@@ -1,6 +1,7 @@
 import numpy as np
 from numpy import linalg as lg
 
+
 # Task 1: Geometrical transformations
 def getAffineTransformation(pts1, pts2):
     """
@@ -115,7 +116,7 @@ def multipleSegmentDefromation(img, Qs, Ps, Qt, Pt, p, b):
         Rt = np.array([x, y])
         sum1 = 0  # will hold sum of Wi*Ri for all i
         sum2 = 0  # will hold sum of Wi for all i
-        
+
         for i in range(0, len(Qs)):
             Ri, beita = singleSegmentationDeformation(Rt, Qt[i], Pt[i],
                                                       Qs[i], Ps[i])
@@ -159,7 +160,8 @@ def imGradSobel(img):
     # replace the mid element of the tuple in Gx matrix
     for i in range(1, rows - 1):
         for j in range(0, cols):
-            currVector = np.array([newImage[i - 1, j], newImage[i, j], newImage[i + 1, j]])
+            currVector = np.array(
+                [newImage[i - 1, j], newImage[i, j], newImage[i + 1, j]])
             newVal = np.dot(currVector, kernelRow)
             # if newVal < 0:
             #     newVal = 0
@@ -169,7 +171,8 @@ def imGradSobel(img):
     # same for cols in Gy matrix
     for j in range(1, cols - 1):
         for i in range(0, rows):
-            currVector = np.array([newImage[i, j - 1], newImage[i, j], newImage[i, j + 1]])
+            currVector = np.array(
+                [newImage[i, j - 1], newImage[i, j], newImage[i, j + 1]])
             newVal = np.dot(currVector, kernelCol)
             # if newVal < 0:
             #     newVal = 0
@@ -184,5 +187,41 @@ def imGradSobel(img):
     Gy = np.array(Gy, dtype=int)
     temp = np.power(Gx, 2) + np.power(Gy, 2)
     magnitude = np.asarray(np.sqrt(temp), int)
+
+    return Gx, Gy, magnitude
+
+
+def imGradSobelHILLA(img):
+    """
+    :param img: an image
+    :return: the gradient images (direction and magnitude)
+    using the Sobel operator to calculate the image gradient.
+    """
+    newImage = np.copy(img)
+    newImage = np.lib.pad(newImage, ((1, 1),), 'reflect')
+    N = np.copy(newImage)
+    Gx = np.zeros(img.shape, dtype=int)
+    Gy = np.zeros(img.shape, dtype=int)
+
+    # sobel operator:
+    x1 = np.array([[1, 2, 1]]).T
+    x2 = np.array([[-1, 0, 1]])
+    y1 = np.array([[-1, 0, 1]]).T
+    y2 = np.array([[1, 2, 1]])
+
+    for y, x in np.ndindex(img.shape):
+        if x == 0 or y == 0 or x == img.shape[0] or y == img.shape[1]:
+            continue
+        A = np.array([[newImage[y - 1, x - 1], newImage[y - 1, x], newImage[y - 1, x + 1]],
+                      [newImage[y, x - 1],     newImage[y, x],     newImage[y + 1, x]],
+                      [newImage[y + 1, x - 1], newImage[y + 1, x], newImage[y + 1, x + 1]]])
+
+        temp = x1[:] * (x2[:] * A[:])
+        Gx[y, x] = np.sum(temp)
+
+        temp = y1[:] * (y2[:] * A[:])
+        Gy[y, x] = np.sum(temp)
+
+    magnitude = np.sqrt(np.power(Gx, 2) + np.power(Gy, 2))
 
     return Gx, Gy, magnitude
