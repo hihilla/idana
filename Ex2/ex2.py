@@ -137,57 +137,53 @@ def multipleSegmentDefromation(img, Qs, Ps, Qt, Pt, p, b):
 # Task 2: Image Gradients
 
 def imGradSobel(img):
-    #  copies the image to Gx and Gy , padded with double layer of 0's
     newImage = np.copy(img)
-    Gx = np.pad(newImage, 2, 'constant', constant_values=0)
-    Gy = np.copy(Gx)
-    temp = Gx.shape
-    x = temp[0]
-    y = temp[1]
+    #  both matrices are same size to make to sum of them easier later
+    #  pads each with reflected values, one row\col of each direction
+    Gx = np.lib.pad(newImage, ((1, 1),), 'reflect')
+    Gy = np.lib.pad(newImage, ((1, 1),), 'reflect')
+    # kernels are already reflected
+    kernelRow = np.array([1, 0, -1])
+    kernelCol = np.array([1, 2, 1])
+    rows = Gx.shape[0]
+    cols = Gx.shape[1]
 
-    horizonalChangeCol = np.array([1, 2, 1])
-    horizonalChangeRow = np.array([1, 0, -1])
-    changeHorizontal = np.array([[-1, 0, 1],
-                                 [-2, 0, 2],
-                                 [-1, 0, 1]])
+    # each 3-tuple that at least the mid element is in the original
+    # image are being multiplied with the mask, the result
+    # replace the mid element of the tuple in Gx matrix
+    for i in range(1, rows - 1):
+        for j in range(0, cols):
+            currVector = np.array([Gx[i - 1, j], Gx[i, j], Gx[i + 1, j]])
+            newVal = np.dot(currVector, kernelRow)
+            if newVal < 0:
+                newVal = 0
+            elif newVal > 255:
+                newVal = 255
+            Gx[i, j] = newVal
+    # same for cols in Gy matrix
+    for j in range(1, cols - 1):
+        for i in range(0, rows):
+            currVector = np.array([Gy[i, j - 1], Gy[i, j], Gy[i, j + 1]])
+            newVal = np.dot(currVector, kernelCol)
+            if newVal < 0:
+                newVal = 0
+            elif newVal > 255:
+                newVal = 255
+            Gy[i, j] = newVal
 
-    #  these are just for comfort, can be deleted
-    verticalChangeCol = np.array([1, 0, -1])
-    verticalChangeRow = np.array([1, 2, 1])
-    changeVertical = np.array([[1, 2, 1],
-                               [0, 0 , 0],
-                              [-1, -2, -1]])
+    Gx = Gx[1:rows - 1, 1:cols - 1]
+    Gy = Gy[1:rows - 1, 1:cols - 1]
 
-    for i in range(2, x - 2):
-        for j in range(2, y - 2):
-            toBeChangedGx = np.array([[Gx.item((i-1, j-1)), Gx.item((i, j-1)), Gx.item((i+1, j-1))],
-                                   [Gx.item((i-1,j)), Gx.item((i, j)), Gx.item((i+1, j))],
-                                   [Gx.item((i-1, j+1)), Gx.item((i, j+1)), Gx.item((i+1, j+1))]])
-            toBeChangedGy = np.array([[Gy.item((i-1, j-1)), Gy.item((i, j-1)), Gy.item((i+1, j-1))],
-                                   [Gy.item((i-1, j)), Gy.item((i, j)), Gy.item((i+1, j))],
-                                   [Gy.item((i-1, j+1)), Gy.item((i, j+1)), Gy.item((i+1, j+1))]])
-            temp = np.dot(changeHorizontal, toBeChangedGx)
-            Gx[i, j] = np.sum(temp)
-            # if i == 100 and j == 100:
-            #     print(toBeChangedGx)
-            #     print(temp)
-            #     print(Gx[i, j])
-            # if Gx[i, j] < 0:
-            #     Gx[i, j] = 0
-            # if Gx[i, j] > 255:
-            #     Gx[i, j] = 255
-            temp = np.dot(changeVertical, toBeChangedGy)
-            Gy[i, j] = temp[1, 1]
-            # if Gy[i, j] < 0:
-            #     Gy[i, j] = 0
-            # if Gy[i, j] > 255:
-            #     Gy[i, j] = 255
-            #
+    Gx = np.matrix(Gx)
+    Gy = np.matrix(Gy)
+    magnitude = Gx + Gy
 
-    temp = np.around(np.sqrt(Gx**2 + Gy**2))
-    # deletes padding
-    temp = np.delete(temp, (0, 1, x-1, x-2), axis=0)
-    temp = np.delete(temp, (0, 1, x-1, x-2), axis=1)
-    print(temp)
-    print("%%%%%%%%%%%%%%%%%")
-    return Gx, Gy, temp
+    return Gx, Gy, magnitude
+
+
+
+
+
+
+
+    return 0
