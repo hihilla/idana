@@ -176,10 +176,12 @@ def imGradSobel(img):
 
     Gx = Gx[1:rows - 1, 1:cols - 1]
     Gy = Gy[1:rows - 1, 1:cols - 1]
+    print(Gx)
 
     Gx = np.matrix(Gx)
     Gy = np.matrix(Gy)
     # magnitude = np.sqrt(np.power(Gx, 2) + np.power(Gy, 2))
-    Gx = ling.matrix_power(Gx, 2)
-    magnitude = (Gx + Gy)
+    adar = np.matrix([[1, 3], [1, 2]])
+    print(adar**2)
+    magnitude = Gx**2 + Gy**2
     return Gx, Gy, magnitude
