@@ -1,5 +1,4 @@
 import numpy as np
-from numpy import linalg as ling
 
 
 # Task 1: Geometrical transformations
@@ -139,10 +138,13 @@ def multipleSegmentDefromation(img, Qs, Ps, Qt, Pt, p, b):
 
 def imGradSobel(img):
     newImage = np.copy(img)
-    #  both matrices are same size to make to sum of them easier later
+
+    #  both Gx,Gy matrices are same size to make to sum of them easier later
     #  pads each with reflected values, one row\col of each direction
-    Gx = np.lib.pad(newImage, ((1, 1),), 'reflect')
-    Gy = np.lib.pad(newImage, ((1, 1),), 'reflect')
+    newImage = np.lib.pad(newImage, ((1, 1),), 'reflect')
+    Gx = newImage
+    Gy = newImage
+
     # kernels are already reflected
     kernelRow = np.array([1, 0, -1])
     kernelCol = np.array([1, 2, 1])
@@ -154,10 +156,8 @@ def imGradSobel(img):
     # replace the mid element of the tuple in Gx matrix
     for i in range(1, rows - 1):
         for j in range(0, cols):
-            currVector = np.array([Gx[i - 1, j], Gx[i, j], Gx[i + 1, j]])
+            currVector = np.array([newImage[i - 1, j], newImage[i, j], newImage[i + 1, j]])
             newVal = np.dot(currVector, kernelRow)
-            # print("hey")
-            # print(newVal)
             # if newVal < 0:
             #     newVal = 0
             # elif newVal > 255:
@@ -166,22 +166,20 @@ def imGradSobel(img):
     # same for cols in Gy matrix
     for j in range(1, cols - 1):
         for i in range(0, rows):
-            currVector = np.array([Gy[i, j - 1], Gy[i, j], Gy[i, j + 1]])
+            currVector = np.array([newImage[i, j - 1], newImage[i, j], newImage[i, j + 1]])
             newVal = np.dot(currVector, kernelCol)
-            if newVal < 0:
-                newVal = 0
-            elif newVal > 255:
-                newVal = 255
+            # if newVal < 0:
+            #     newVal = 0
+            # elif newVal > 255:
+            #     newVal = 255
             Gy[i, j] = newVal
 
     Gx = Gx[1:rows - 1, 1:cols - 1]
     Gy = Gy[1:rows - 1, 1:cols - 1]
-    print(Gx)
 
-    Gx = np.matrix(Gx)
-    Gy = np.matrix(Gy)
-    # magnitude = np.sqrt(np.power(Gx, 2) + np.power(Gy, 2))
-    adar = np.matrix([[1, 3], [1, 2]])
-    print(adar**2)
-    magnitude = Gx**2 + Gy**2
+    Gx = np.array(Gx, dtype=int)
+    Gy = np.array(Gy, dtype=int)
+    temp = np.power(Gx, 2) + np.power(Gy, 2)
+    magnitude = np.asarray(np.sqrt(temp), int)
+
     return Gx, Gy, magnitude
