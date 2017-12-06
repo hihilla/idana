@@ -138,55 +138,6 @@ def multipleSegmentDefromation(img, Qs, Ps, Qt, Pt, p, b):
 
 
 # Task 2: Image Gradients
-
-def imGradSobel(img):
-    newImage = np.copy(img)
-
-    #  both Gx,Gy matrices are same size to make to sum of them easier later
-    #  pads each with reflected values, one row\col of each direction
-    newImage = np.lib.pad(newImage, ((1, 1),), 'reflect')
-    Gx = np.copy(newImage)
-    Gy = np.copy(newImage)
-
-    # kernels are already reflected
-    kernelRow = np.array([1, 0, -1])
-    kernelCol = np.array([1, 2, 1])
-    rows = Gx.shape[0]
-    cols = Gx.shape[1]
-
-    # each 3-tuple that at least the mid element is in the original
-    # image are being multiplied with the mask, the result
-    # replace the mid element of the tuple in Gx matrix
-    for i in range(1, rows - 1):
-        for j in range(1, cols - 1):
-            currVector = np.array([newImage[i, j - 1], newImage[i, j], newImage[i, j + 1]])
-            newVal = np.dot(currVector, kernelRow)
-            Gx[i, j] = newVal
-            # print("Gx")
-            # print(Gx)
-    # same for cols in Gy matrix
-    for j in range(1, cols - 1):
-        for i in range(1, rows - 1):
-            currVector = np.array([newImage[i - 1, j], newImage[i, j], newImage[i + 1, j]])
-            newVal = np.dot(currVector, kernelCol)
-            Gy[i, j] = newVal
-            # print(Gy)
-
-    Gx = Gx[1:rows - 1, 1:cols - 1]
-    Gy = Gy[1:rows - 1, 1:cols - 1]
-
-    Gx = np.array(Gx, dtype=int)
-    Gy = np.array(Gy, dtype=int)
-    temp = np.power(Gx, 2) + np.power(Gy, 2)
-    # print("now in shoresh")
-    # print(temp)
-    magnitude = np.asarray(np.sqrt(temp), int)
-    print(Gy)
-    print("finally")
-    print(magnitude)
-
-    return Gx, Gy, magnitude
-
 def imGradSobelHILLA(img):
     """
     :param img: an image
@@ -221,17 +172,3 @@ def imGradSobelHILLA(img):
     magnitude = np.sqrt(np.power(Gx, 2) + np.power(Gy, 2))
 
     return Gx, Gy, magnitude
-
-
-def adar():
-    thing = np.array([[2, 1, 3],
-                     [8, 5, 6],
-                     [7, 4, 9]])
-    resx, resy, resfin = imGradSobel(thing)
-    print("Gx")
-    print(resx)
-    print("Gy")
-    print(resy)
-    print("fin")
-    print(resfin)
-    return 0
