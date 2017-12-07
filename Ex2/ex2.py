@@ -138,7 +138,7 @@ def multipleSegmentDefromation(img, Qs, Ps, Qt, Pt, p, b):
 
 
 # Task 2: Image Gradients
-def imGradSobelHILLA(img):
+def imGradSobel(img):
     """
     :param img: an image
     :return: the gradient images (direction and magnitude)
