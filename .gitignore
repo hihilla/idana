@@ -99,3 +99,8 @@ ENV/
 
 # mypy
 .mypy_cache/
+Ex2/.idea/workspace.xml
+Ex2/.idea/vcs.xml
+Ex2/.idea/modules.xml
+Ex2/.idea/misc.xml
+Ex2/.idea/Ex2.iml
