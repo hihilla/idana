@@ -24,14 +24,16 @@ def HoughCircles(imageEdges, radius, votesThresh, distThresh):
 
     radius = np.array(radius)
     thetas = np.arange(0, 360, 1) * np.pi / 180.0
+    cosT = np.cos(thetas)
+    sinT = np.sin(thetas)
     # voting
     for i in np.arange(0, len(Ys)):
         x, y = Xs[i], Ys[i]
         for r in np.arange(0, len(radius)):
             rad = radius[r]
             # polar coordinates
-            a = np.uint(np.round(x - rad * np.cos(thetas)))
-            b = np.uint(np.round(y - rad * np.sin(thetas)))
+            a = np.uint(np.round(x - rad * cosT))
+            b = np.uint(np.round(y - rad * sinT))
             # get only coordinates in bounds
             goodAs = np.logical_and(0 <= a, a < xBound)
             goodBs = np.logical_and(0 <= b, b < yBound)
