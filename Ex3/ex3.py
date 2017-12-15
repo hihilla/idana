@@ -1,3 +1,7 @@
+import numpy as np
+import ex3Utils
+
+
 # Task 1:
 def HoughCircles(imageEdges, radius, votesThresh, distThresh):
     """
@@ -8,17 +12,44 @@ def HoughCircles(imageEdges, radius, votesThresh, distThresh):
     required to declare a circle
     :param distThresh: threshold represents the minimal distance between the
     centers of two different circles
-    :return: all the circles (center (x,y)  and radius) detected on the image
-    as an Nx3 array where each row is x,y,r.
+    :return: all the circles (center (x,y), radius, votes) detected on the image
+    as an Nx4 array where each row is x,y,r,votes.
     """
-    #To clean-up your detected circles and return only local-maxima circles you
-    # may use the function ex3Utils.selectLocalMaxima provided in the
-    # ex3utils.py file.
-    #Relevant numpy functions:
-    #numpy.nonzero: https://docs.scipy.org/doc/numpy-1.13.0/reference/generated/numpy.nonzero.html
-    #numpy.argwhere: https://docs.scipy.org/doc/numpy-1.13.0/reference/generated/numpy.argwhere.html
+    yBound, xBound = imageEdges.shape
 
-    return "np"
+    # initiate accumulator
+    A = np.zeros((xBound, yBound, len(radius)), dtype=int)
+    # get only edges from image
+    Xs, Ys = np.nonzero(imageEdges)
+
+    radius = np.array(radius)
+    thetas = np.arange(0, 360, 1) * np.pi / 180.0
+    # voting
+    for i in np.arange(0, len(Ys)):
+        x, y = Xs[i], Ys[i]
+        for r in np.arange(0, len(radius)):
+            rad = radius[r]
+            # polar coordinates
+            a = np.uint(np.round(x - rad * np.cos(thetas)))
+            b = np.uint(np.round(y - rad * np.sin(thetas)))
+            # get only coordinates in bounds
+            goodAs = np.logical_and(0 <= a, a < xBound)
+            goodBs = np.logical_and(0 <= b, b < yBound)
+            goods = np.argwhere(np.logical_and(goodAs, goodBs)).T
+            a = a[goods]
+            b = b[goods]
+            # vote
+            A[(a, b, r)] += 1
+    # getting ready for localMaxima
+    As, Bs, rs = np.argwhere(A >= votesThresh).T
+    votes = A[As, Bs, rs]
+    Rs = radius[rs[:]]
+
+    circles = np.vstack((As, Bs, Rs, votes)).T
+
+    localMaxima = ex3Utils.selectLocalMaxima(circles, votesThresh, distThresh)
+
+    return localMaxima
 
 
 # Task 2:
