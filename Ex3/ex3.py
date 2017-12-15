@@ -1,6 +1,5 @@
 import numpy as np
 import ex3Utils
-import numpy.linalg as la
 from numpy.matlib import repmat
 
 
@@ -60,20 +59,21 @@ def HoughCircles(imageEdges, radius, votesThresh, distThresh):
 def bilateralFilter(imgNoisy, spatial_std, range_std):
     """
     Implement Bilateral Filter
-    :param imgNoisy: noist image
+    :param imgNoisy: image with noise
     :param spatial_std: sigma s
     :param range_std: sigma r
     :return: image that is a result of applying bilateral filter
     """
     M, N = imgNoisy.shape
+    imgNoisy = np.asarray(imgNoisy, dtype=float)
     newImg = np.zeros(imgNoisy.shape)
     sigma = int(spatial_std * 3)  # further then that has no influence
     # create kernel to screen image, instead of going over non-influence pixels
     kernel = getKernel(sigma)
-    weights = getWheights(kernel, spatial_std)
+    weights = getWeights(kernel, spatial_std)
 
     for p in np.ndindex(imgNoisy.shape):
-        kernelCoordinates = np.uint32(repmat([p], kernel.shape[0], 1) + kernel)
+        kernelCoordinates = np.int32(repmat([p], kernel.shape[0], 1) + kernel)
         ys, xs = getXsAndYs(M, N, kernelCoordinates)
         # calculate Wpq according to bilateral formula
         pixelsAround = imgNoisy[(ys, xs)]
@@ -82,12 +82,12 @@ def bilateralFilter(imgNoisy, spatial_std, range_std):
         tempWs = tempWs / tempWs.sum()
         W = weights * tempWs
         # calculate new gray value
-        newImg[p] = np.sum(pixelsAround * W) / np.sum(W)
+        newImg[p] = np.sum(W * pixelsAround) / np.sum(W)
     newImg = np.asarray(newImg, dtype=int)
     return newImg
 
 
-def getWheights(kernel, spatial_std):
+def getWeights(kernel, spatial_std):
     tempW = np.abs(np.sum(kernel ** 2, 1))
     tempW = np.exp(-tempW / 2 * (spatial_std ** 2))
     weightsS = tempW / tempW.sum()
@@ -109,4 +109,3 @@ def getXsAndYs(yBound, xBound, kernelCoordinates):
     xs[xs < 0] = 0
     xs[xs > xBound - 1] = xBound - 1
     return ys, xs
-
