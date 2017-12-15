@@ -1,5 +1,7 @@
 import numpy as np
 import ex3Utils
+import numpy.linalg as la
+from numpy.matlib import repmat
 
 
 # Task 1:
@@ -57,10 +59,54 @@ def HoughCircles(imageEdges, radius, votesThresh, distThresh):
 # Task 2:
 def bilateralFilter(imgNoisy, spatial_std, range_std):
     """
-    WILL FILL LATER
-    :param imgNoisy:
-    :param spatial_std:
-    :param range_std:
-    :return:
+    Implement Bilateral Filter
+    :param imgNoisy: noist image
+    :param spatial_std: sigma s
+    :param range_std: sigma r
+    :return: image that is a result of applying bilateral filter
     """
-    return "no"
+    M, N = imgNoisy.shape
+    newImg = np.zeros(imgNoisy.shape)
+    sigma = int(spatial_std * 3)  # further then that has no influence
+    # create kernel to screen image, instead of going over non-influence pixels
+    kernel = getKernel(sigma)
+    weights = getWheights(kernel, spatial_std)
+
+    for p in np.ndindex(imgNoisy.shape):
+        kernelCoordinates = np.uint32(repmat([p], kernel.shape[0], 1) + kernel)
+        ys, xs = getXsAndYs(M, N, kernelCoordinates)
+        # calculate Wpq according to bilateral formula
+        pixelsAround = imgNoisy[(ys, xs)]
+        tempWs = (pixelsAround - imgNoisy[p]) ** 2
+        tempWs = np.exp(-tempWs / (2 * range_std ** 2))
+        tempWs = tempWs / tempWs.sum()
+        W = weights * tempWs
+        # calculate new gray value
+        newImg[p] = np.sum(pixelsAround * W) / np.sum(W)
+    newImg = np.asarray(newImg, dtype=int)
+    return newImg
+
+
+def getWheights(kernel, spatial_std):
+    tempW = np.abs(np.sum(kernel ** 2, 1))
+    tempW = np.exp(-tempW / 2 * (spatial_std ** 2))
+    weightsS = tempW / tempW.sum()
+    return weightsS
+
+
+def getKernel(sigma):
+    Ys, Xs = np.meshgrid(np.linspace(-sigma, sigma, 1 + 2 * sigma),
+                         np.linspace(-sigma, sigma, 1 + 2 * sigma))
+    kernel = np.vstack((Ys.flatten(), Xs.flatten())).T
+    return kernel
+
+
+def getXsAndYs(yBound, xBound, kernelCoordinates):
+    ys = kernelCoordinates[:, 0]
+    xs = kernelCoordinates[:, 1]
+    ys[ys < 0] = 0
+    ys[ys > yBound - 1] = yBound - 1
+    xs[xs < 0] = 0
+    xs[xs > xBound - 1] = xBound - 1
+    return ys, xs
+
