@@ -73,21 +73,24 @@ def bilateralFilter(imgNoisy, spatial_std, range_std):
     weights = getWeights(kernel, spatial_std)
 
     for p in np.ndindex(imgNoisy.shape):
+        # finding coordinates of surrounding pixels using kernel
         kernelCoordinates = np.int32(repmat([p], kernel.shape[0], 1) + kernel)
-        ys, xs = getXsAndYs(M, N, kernelCoordinates)
+        ys, xs = getXsAndYsFrom(kernelCoordinates, M, N)
         # calculate Wpq according to bilateral formula
-        pixelsAround = imgNoisy[(ys, xs)]
-        tempWs = (pixelsAround - imgNoisy[p]) ** 2
+        Iq = imgNoisy[(ys, xs)]
+        Ip = imgNoisy[p]
+        tempWs = (Ip - Iq) ** 2
         tempWs = np.exp(-tempWs / (2 * range_std ** 2))
         tempWs = tempWs / tempWs.sum()
         W = weights * tempWs
         # calculate new gray value
-        newImg[p] = np.sum(W * pixelsAround) / np.sum(W)
+        newImg[p] = np.sum(W * Iq) / np.sum(W)
     newImg = np.asarray(newImg, dtype=int)
     return newImg
 
 
 def getWeights(kernel, spatial_std):
+    # each surrounding pixel has a different weight according to it's distance
     tempW = np.abs(np.sum(kernel ** 2, 1))
     tempW = np.exp(-tempW / 2 * (spatial_std ** 2))
     weightsS = tempW / tempW.sum()
@@ -95,13 +98,19 @@ def getWeights(kernel, spatial_std):
 
 
 def getKernel(sigma):
+    # we want all pixels with coordinates around the current pixel.
+    # se we're creating a grid where the top right coordinate is
+    # current x - sigma, current y - sigma
+    # the bottom left coordinate is current x + sigma, current y + sigma
+    # that way we get a kernel-like matrix to know the surrounding coordinates
+    # of the current pixel
     Ys, Xs = np.meshgrid(np.linspace(-sigma, sigma, 1 + 2 * sigma),
                          np.linspace(-sigma, sigma, 1 + 2 * sigma))
     kernel = np.vstack((Ys.flatten(), Xs.flatten())).T
     return kernel
 
 
-def getXsAndYs(yBound, xBound, kernelCoordinates):
+def getXsAndYsFrom(kernelCoordinates, yBound, xBound):
     ys = kernelCoordinates[:, 0]
     xs = kernelCoordinates[:, 1]
     ys[ys < 0] = 0
