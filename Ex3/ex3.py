@@ -67,7 +67,7 @@ def bilateralFilter(imgNoisy, spatial_std, range_std):
     M, N = imgNoisy.shape
     imgNoisy = np.asarray(imgNoisy, dtype=float)
     newImg = np.zeros(imgNoisy.shape)
-    sigma = int(spatial_std * 3)  # further then that has no influence
+    sigma = int(spatial_std * 3)  # further than that has no influence
     # create kernel to screen image, instead of going over non-influence pixels
     kernel = getKernel(sigma)
     weights = getWeights(kernel, spatial_std)
@@ -99,7 +99,7 @@ def getWeights(kernel, spatial_std):
 
 def getKernel(sigma):
     # we want all pixels with coordinates around the current pixel.
-    # se we're creating a grid where the top right coordinate is
+    # so we're creating a grid where the top right coordinate is
     # current x - sigma, current y - sigma
     # the bottom left coordinate is current x + sigma, current y + sigma
     # that way we get a kernel-like matrix to know the surrounding coordinates
