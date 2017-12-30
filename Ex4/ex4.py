@@ -92,9 +92,7 @@ def imageUpsampling(img, upsamplingFactor):
     padWidth = np.array(((shape * upsamplingFactor) - shape) / 2.0, dtype=int)
     _, padWidth = np.meshgrid(padWidth, padWidth)
 
-    zeroPaddedFFT = np.lib.pad(shiftFFT,
-                               padWidth,
-                               'constant')
+    zeroPaddedFFT = np.lib.pad(shiftFFT, padWidth, 'constant')
     zeroPaddedFFT *= (upsamplingFactor[0] * upsamplingFactor[1])
 
     # Shift the High frequency components to the center and Low frequency components outside.
@@ -108,6 +106,14 @@ def imageUpsampling(img, upsamplingFactor):
 
 # Task 4
 def phaseCorr(img1, img2):
+    """
+    Implement an algorithm that finds a translation between two images sampled from an original
+    image. this, implement the phase-correlation algorithm which use the frequency domain to find
+    the translation in x, y between two images.
+    :param img1:
+    :param img2:
+    :return:
+    """
     return 0
 
 
