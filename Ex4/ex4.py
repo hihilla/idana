@@ -6,16 +6,15 @@ import numpy as np
 def Fourier1D(x_n):
     n = len(x_n)
     x_n_fourier = np.ndarray(n, complex)
+    exponents = np.ndarray(n)
+    exponents = np.repeat(-2 * np.pi / n, n)
+    x_nIndices = np.arange(n)
+    exponents = np.multiply(exponents, x_nIndices)
 
     # for each element in the transformed vector, the following calcs the
     # power of the exponent, calcs the imaginary and real values and sums
     # them to their right position of the transformed vector
     for k in np.arange(0, n):
-        exponents = np.ndarray(n)
-        # calculates the exponents power only
-        for x in np.arange(n):
-            exponents[x] = -2 * k * x / n
-
         # calculate the real and imaginary values
         # the 2 val arrays will hold each iteration of the sum (sigma)
         realVals = np.ndarray(n)
