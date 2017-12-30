@@ -48,8 +48,8 @@ def invFourier1D(F_n):
 
         # each element is the result of cos/sin on the exponent,
         # transformed the sin values to be imaginary
-        cosVals = np.cos(np.multiply(exponents, np.multiply(np.pi, x)))
-        sinVals = np.sin(np.multiply(exponents, np.multiply(np.pi, x)))
+        cosVals = np.cos(np.multiply(np.multiply(exponents, x), np.pi))
+        sinVals = np.sin(np.multiply(np.multiply(exponents, x), np.pi))
         sinVals = np.multiply(sinVals, 1j)
 
         cosVals = np.multiply(F_n, cosVals)
@@ -59,7 +59,6 @@ def invFourier1D(F_n):
 
     return x_n_invFourier
 
-
 def cartesianToPolar(cartesian):
     real = np.real(cartesian)
     imag = np.imag(cartesian)
@@ -67,7 +66,7 @@ def cartesianToPolar(cartesian):
     R = np.sqrt(np.power(real, 2) + np.power(imag, 2))
     theta = np.arctan2(imag, real)
 
-    polar = np.multiply(R, np.exp(np.multiply(1j, theta)))
+    polar = np.column_stack((R, theta))
 
     return polar
 
