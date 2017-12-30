@@ -13,17 +13,16 @@ def Fourier1D(x_n):
     for k in np.arange(0, n):
         exponents = np.ndarray(n)
         # calculates the exponents power only
-        x_index = 0
-        for x in np.nditer(x_n):
-            exponents[x_index] = -2 * np.pi * k * x / n
-            x_index += 1
+        for x in np.arange(n):
+            exponents[x] = -2 * k * x / n
+
         # calculate the real and imaginary values
         # the 2 val arrays will hold each iteration of the sum (sigma)
         realVals = np.ndarray(n)
         imagVals = np.ndarray(n, complex)
         for i in np.arange(0, n):
-            realVals[i] = np.cos(exponents[i])
-            imagVals[i] = 1j * np.sin(exponents[i])
+            realVals[i] = np.cos(np.pi * exponents[i])
+            imagVals[i] = 1j * np.sin(np.pi * exponents[i])
         realVals = np.multiply(realVals, x_n)
         imagVals = np.multiply(imagVals, x_n)
         x_n_fourier[k] = np.sum(realVals) + np.sum(imagVals)
@@ -43,7 +42,7 @@ def invFourier1D(F_n):
         k_index = 0
         # exponents powers calculations
         for k in np.nditer(F_n):
-            exponents[k] = 2 * np.pi * k_index * x / n
+            exponents[k_index] = 2 * np.pi * k_index * x / n
             k_index += 1
         cosVals = np.ndarray(n, complex)
         sinVals = np.ndarray(n, complex)
