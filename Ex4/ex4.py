@@ -7,24 +7,26 @@ def Fourier1D(x_n):
     n = len(x_n)
     x_n_fourier = np.ndarray(n, complex)
 
-    # for each element in the transformed vector, the following calcs the
-    # power of the exponent, calcs the imaginary and real values and sums
-    # them to their right position of the transformed vector
-    for k in np.arange(0, n):
-        exponents = np.ndarray(n)
-        # calculates the exponents power only
-        for x in np.arange(n):
-            exponents[x] = -2 * k * x / n
+    # vector of the powers of the exponent
+    exponents = np.ndarray(n)
+    exponents = np.repeat(-2 / n, n)
+    x_nIndices = np.arange(n)
+    exponents = np.multiply(exponents, x_nIndices)
 
-        # calculate the real and imaginary values
-        # the 2 val arrays will hold each iteration of the sum (sigma)
+    # with each iteration fills an element of the transformed vector
+    for k in np.arange(0, n):
         realVals = np.ndarray(n)
         imagVals = np.ndarray(n, complex)
-        for i in np.arange(0, n):
-            realVals[i] = np.cos(np.pi * exponents[i])
-            imagVals[i] = 1j * np.sin(np.pi * exponents[i])
-        realVals = np.multiply(realVals, x_n)
-        imagVals = np.multiply(imagVals, x_n)
+
+        # each element is the result of cos/sin of the exponent,
+        # and transformed the sin values to be imaginary
+        realVals = np.cos(np.multiply(exponents, np.pi * k))
+        imagVals = np.sin(np.multiply(exponents, np.pi * k))
+        imagVals = np.multiply(imagVals, 1j)
+
+        realVals = np.multiply(x_n, realVals)
+        imagVals = np.multiply(x_n, imagVals)
+
         x_n_fourier[k] = np.sum(realVals) + np.sum(imagVals)
 
     return x_n_fourier
@@ -32,37 +34,52 @@ def Fourier1D(x_n):
 # b
 def invFourier1D(F_n):
     n = len(F_n)
-    x_n_invFourier = np.ndarray(n)
+    x_n_invFourier = np.ndarray(n, complex)
 
-    # for every element of the original (unknown) vector calculates:
-    # the exponents and their cos ans sin (real and imaginary)
-    # sums both array of results and devides to real and imaginary parts
+    # vector of the powers of the exponent
+    exponents = np.repeat(2 / n, n)
+    k_nIndices = np.arange(n)
+    exponents = np.multiply(exponents, k_nIndices)
+
+    # with each iteration fills an element of the 'original' vector
     for x in np.arange(0, n):
-        exponents = np.ndarray(n)
-        k_index = 0
-        # exponents powers calculations
-        for k in np.nditer(F_n):
-            exponents[k_index] = 2 * np.pi * k_index * x / n
-            k_index += 1
         cosVals = np.ndarray(n, complex)
         sinVals = np.ndarray(n, complex)
-        for i in np.arange(0, n):
-            cosVals[i] = np.cos(exponents[i])
-            sinVals[i] = 1j * np.sin(exponents[i])
-        realAndImagSum = np.sum(cosVals) + np.sum(sinVals)
-        x_n_invFourier[x] = realAndImagSum
+
+        # each element is the result of cos/sin on the exponent,
+        # transformed the sin values to be imaginary
+        cosVals = np.cos(np.multiply(np.multiply(exponents, x), np.pi))
+        sinVals = np.sin(np.multiply(np.multiply(exponents, x), np.pi))
+        sinVals = np.multiply(sinVals, 1j)
+
+        cosVals = np.multiply(F_n, cosVals)
+        sinVals = np.multiply(F_n, sinVals)
+
+        x_n_invFourier[x] = np.divide(np.sum(cosVals) + np.sum(sinVals), n)
 
     return x_n_invFourier
 
+def cartesianToPolar(cartesian):
+    real = np.real(cartesian)
+    imag = np.imag(cartesian)
+
+    R = np.sqrt(np.power(real, 2) + np.power(imag, 2))
+    theta = np.arctan2(imag, real)
+
+    polar = np.column_stack((R, theta))
+
+    return polar
 
 # c
 def Fourier1DPolar(x_n):
-    return 0
+
+    return cartesianToPolar(Fourier1D(x_n))
 
 
 # d
 def invFourier1DPolar(F_n_polar):
-    return 0
+
+    return cartesianToPolar(invFourier1D(F_n_polar))
 
 
 # Task 3
