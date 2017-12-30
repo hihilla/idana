@@ -34,13 +34,12 @@ def Fourier1D(x_n):
 # b
 def invFourier1D(F_n):
     n = len(F_n)
-    x_n_invFourier = np.ndarray(n)
+    x_n_invFourier = np.ndarray(n, complex)
 
     # vector of the powers of the exponent
-    exponents = np.ndarray(n)
     exponents = np.repeat(2 / n, n)
-    x_nIndices = np.arange(n)
-    exponents = np.multiply(exponents, x_nIndices)
+    k_nIndices = np.arange(n)
+    exponents = np.multiply(exponents, k_nIndices)
 
     # with each iteration fills an element of the 'original' vector
     for x in np.arange(0, n):
@@ -49,14 +48,14 @@ def invFourier1D(F_n):
 
         # each element is the result of cos/sin on the exponent,
         # transformed the sin values to be imaginary
-        cosVals = np.cos(np.multiply(exponents, np.pi * x))
-        sinVals = np.sin(np.multiply(exponents, np.pi * x))
+        cosVals = np.cos(np.multiply(exponents, np.multiply(np.pi, x)))
+        sinVals = np.sin(np.multiply(exponents, np.multiply(np.pi, x)))
         sinVals = np.multiply(sinVals, 1j)
 
         cosVals = np.multiply(F_n, cosVals)
         sinVals = np.multiply(F_n, sinVals)
 
-        x_n_invFourier[x] = np.multiply(1 / n, np.sum(cosVals) + np.sum(sinVals))
+        x_n_invFourier[x] = np.divide(np.sum(cosVals) + np.sum(sinVals), n)
 
     return x_n_invFourier
 
@@ -65,10 +64,10 @@ def cartesianToPolar(cartesian):
     real = np.real(cartesian)
     imag = np.imag(cartesian)
 
-    R = np.sqrt(real**2 + imag**2)
-    theta = np.arctan2(real, imag)
+    R = np.sqrt(np.power(real, 2) + np.power(imag, 2))
+    theta = np.arctan2(imag, real)
 
-    polar = R * np.exp(1j * theta)
+    polar = np.multiply(R, np.exp(np.multiply(1j, theta)))
 
     return polar
 
