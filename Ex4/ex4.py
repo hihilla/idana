@@ -61,14 +61,27 @@ def invFourier1D(F_n):
     return x_n_invFourier
 
 
+def cartesianToPolar(cartesian):
+    real = np.real(cartesian)
+    imag = np.imag(cartesian)
+
+    R = np.sqrt(real**2 + imag**2)
+    theta = np.arctan2(real, imag)
+
+    polar = R * np.exp(1j * theta)
+
+    return polar
+
 # c
 def Fourier1DPolar(x_n):
-    return 0
+
+    return cartesianToPolar(Fourier1D(x_n))
 
 
 # d
 def invFourier1DPolar(F_n_polar):
-    return 0
+
+    return cartesianToPolar(invFourier1D(F_n_polar))
 
 
 # Task 3
