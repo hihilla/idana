@@ -67,7 +67,43 @@ def invFourier1DPolar(F_n_polar):
 
 # Task 3
 def imageUpsampling(img, upsamplingFactor):
-    return 0
+    """
+    Implement a 2D image upsampling function. The algorithm should be the zero-padding in the
+    frequency domain.
+    In case of scaling factor < 1, the function should return the original image and its Fourier
+    transform for both the Fourier and the zero-padded Fourier return values.
+    :param img: 2D image
+    :param upsamplingFactor: 2D vector with the upscaling parameters (larger than 1)
+    at each dimension
+    :return: The upsampled image, the FFT of the original images, and the zero-padded FFT
+    """
+
+    upsamplingFactor = np.array(upsamplingFactor)
+    FFTimg = np.fft.fft2(img)
+    # Shift the Low frequency components to the center and High frequency components outside.
+    shiftFFT = np.fft.fftshift(FFTimg)
+
+    # if scaling factor < 1, return original img and fourier transform
+    if (upsamplingFactor < 1).any():
+        return img, shiftFFT, shiftFFT
+
+    # Pad with zeros
+    shape = np.array(img.shape)
+    padWidth = np.array(((shape * upsamplingFactor) - shape) / 2.0, dtype=int)
+    _, padWidth = np.meshgrid(padWidth, padWidth)
+
+    zeroPaddedFFT = np.lib.pad(shiftFFT,
+                               padWidth,
+                               'constant')
+    zeroPaddedFFT *= (upsamplingFactor[0] * upsamplingFactor[1])
+
+    # Shift the High frequency components to the center and Low frequency components outside.
+    invShift = np.fft.ifftshift(zeroPaddedFFT)
+
+    # Perform Inverse Fast Fourier Transform
+    # upsampledImg = np.array(np.fft.ifft2(invShift).real, dtype=int)
+    upsampledImg = np.abs(np.fft.ifft2(invShift))
+    return upsampledImg, shiftFFT, zeroPaddedFFT
 
 
 # Task 4
