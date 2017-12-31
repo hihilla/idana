@@ -59,6 +59,14 @@ def invFourier1D(F_n):
 
     return x_n_invFourier
 
+def polarToCartes(polar):
+    R = polar[:, 0]
+    t = polar[:, 1]
+    a = R * np.cos(t)
+    b = R * np.sin(t)
+
+    return a + 1j * b
+
 def cartesianToPolar(cartesian):
     real = np.real(cartesian)
     imag = np.imag(cartesian)
