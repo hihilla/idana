@@ -162,6 +162,7 @@ def test_5d1():
     ax1.imshow(img, cmap='gray',vmin=0, vmax=255), ax1.set_title('Image')
     ax2.imshow(imgMotion, cmap='gray'), ax2.set_title('Degraded image')
     ax3.imshow(recImg, cmap='gray'), ax3.set_title('recovered from degraded image')
+    plt.show()
     
 def test_5d2():
     
@@ -187,6 +188,7 @@ def test_5d2():
     ax1.imshow(img, cmap='gray',vmin=0, vmax=255), ax1.set_title('Image')
     ax2.imshow(imgEcho, cmap='gray'), ax2.set_title('Degraded image')
     ax3.imshow(recImg, cmap='gray'), ax3.set_title('recovered from degraded image')
+    plt.show()
     
     
 if __name__ == "__main__":
@@ -228,8 +230,8 @@ if __name__ == "__main__":
 #     test_5 (imageName, lowThresh,highThresh)
 #
 #     # deconvolution
-#     test_5d1()
+    test_5d1()
 #
-#     test_5d2()
-    plotToPdf()
+    # test_5d2()
+#     plotToPdf()
    

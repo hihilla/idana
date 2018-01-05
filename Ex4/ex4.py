@@ -92,7 +92,6 @@ def imageUpsampling(img, upsamplingFactor):
     at each dimension
     :return: The upsampled image, the FFT of the original images, and the zero-padded FFT
     """
-
     upsamplingFactor = np.array(upsamplingFactor)
     FFTimg = np.fft.fft2(img)
     # Shift the Low frequency components to the center and High frequency components outside.
@@ -170,8 +169,8 @@ def imFreqFilter(img, lowThresh, highThresh):
 
     # create martrix of distance from center
     xBound, yBound = H.shape
-    xTmp = np.linspace(0, xBound, xBound) - xBound / 2.0
-    yTmp = np.linspace(0, yBound, yBound) - yBound / 2.0
+    xTmp = np.linspace(0, xBound - 1, xBound) - xBound / 2.0
+    yTmp = np.linspace(0, yBound - 1, yBound) - yBound / 2.0
     us, vs = np.meshgrid(xTmp, yTmp)
     distanceMatrix = np.sqrt(us ** 2 + vs ** 2)
 
@@ -184,12 +183,29 @@ def imFreqFilter(img, lowThresh, highThresh):
     return filteredImg, Fimg, H
 
 # d
-def imageDeconv(img, kernel, k):
+def imageDeconv(G, H, k):
     """
     Implement the Weiner filter for image restoration.
-    :param img: the degraded image
-    :param kernel: the convolution kernel used to degrade the image
+    :param G: the degraded image
+    :param H: the convolution kernel used to degrade the image
     :param k: the lambda parameter to avoid dividing by zero
     :return: the restored image
     """
-    return 0
+    # frequency domain
+    FH = np.fft.fft2(H, G.shape)
+    FG = np.fft.fft2(G)
+
+    # calculating weiners formila
+    Hstar = np.conjugate(FH)
+    xBound, yBound = G.shape
+    Xs = np.linspace(0, xBound - 1, xBound)
+    Ys = np.linspace(1, yBound - 1, yBound)
+    us, vs = np.meshgrid(Xs, Ys)
+    tmp = Hstar * FH + k * (us ** 2 + vs ** 2)
+    F = (Hstar / tmp) * FG
+    Fspatial = np.fft.ifft2(F).real
+    # fix shift
+    kernelShape = H.shape
+    Fspatial = np.roll(Fspatial, int(kernelShape[0] / 2.0), 0)
+    Fspatial = np.roll(Fspatial, int(kernelShape[0] / 2.0), 1)
+    return Fspatial
