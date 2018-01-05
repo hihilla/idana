@@ -3,69 +3,53 @@ import numpy as np
 
 # Task 2
 # a
-def Fourier1D(x_n):
-    n = len(x_n)
-    x_n_fourier = np.ndarray(n, complex)
+def Fourier1D(Xn):
+    n = len(Xn)
+    XnFourier = np.ndarray(n, complex)
 
     # vector of the powers of the exponent
-    exponents = np.ndarray(n)
-    exponents = np.repeat(-2 / n, n)
-    x_nIndices = np.arange(n)
-    exponents = np.multiply(exponents, x_nIndices)
+    exponents = np.repeat(-2.0 / n, n)
+    XnIndices = np.arange(n)
+    exponents = np.multiply(exponents, XnIndices)
 
     # with each iteration fills an element of the transformed vector
     for k in np.arange(0, n):
-        realVals = np.ndarray(n)
-        imagVals = np.ndarray(n, complex)
-
         # each element is the result of cos/sin of the exponent,
         # and transformed the sin values to be imaginary
         realVals = np.cos(np.multiply(exponents, np.pi * k))
         imagVals = np.sin(np.multiply(exponents, np.pi * k))
         imagVals = np.multiply(imagVals, 1j)
 
-        realVals = np.multiply(x_n, realVals)
-        imagVals = np.multiply(x_n, imagVals)
+        realVals = np.multiply(Xn, realVals)
+        imagVals = np.multiply(Xn, imagVals)
 
-        x_n_fourier[k] = np.sum(realVals) + np.sum(imagVals)
+        XnFourier[k] = np.sum(realVals) + np.sum(imagVals)
 
-    return x_n_fourier
+    return XnFourier
 
 # b
-def invFourier1D(F_n):
-    n = len(F_n)
-    x_n_invFourier = np.ndarray(n, complex)
+def invFourier1D(Fn):
+    n = len(Fn)
+    XnInvFourier = np.ndarray(n, complex)
 
     # vector of the powers of the exponent
     exponents = np.repeat(np.pi * 2 / n, n)
-    k_nIndices = np.arange(n)
-    exponents = np.multiply(exponents, k_nIndices)
+    exponents = np.multiply(exponents, np.arange(n))
 
     # with each iteration fills an element of the 'original' vector
     for x in np.arange(0, n):
-        cosVals = np.ndarray(n, complex)
-        sinVals = np.ndarray(n, complex)
-
         # each element is the result of cos/sin on the exponent,
         # transformed the sin values to be imaginary
         cosVals = np.cos(np.multiply(exponents, x))
         sinVals = np.sin(np.multiply(exponents, x))
         sinVals = np.multiply(sinVals, 1j)
 
-        cosVals = np.multiply(F_n, cosVals)
-        sinVals = np.multiply(F_n, sinVals)
+        cosVals = np.multiply(Fn, cosVals)
+        sinVals = np.multiply(Fn, sinVals)
 
-        x_n_invFourier[x] = np.divide(np.sum(cosVals) + np.sum(sinVals), n)
+        XnInvFourier[x] = np.divide(np.sum(cosVals) + np.sum(sinVals), n)
 
-    return x_n_invFourier
-
-def polarToCartes(polar):
-    R = polar[:, 0]
-    t = polar[:, 1]
-    a = R * np.cos(t)
-    b = R * np.sin(t)
-
-    return a + 1j * b
+    return XnInvFourier
 
 def cartesianToPolar(cartesian):
     real = np.real(cartesian)
@@ -87,15 +71,13 @@ def polarToCartes(polar):
     return a + 1j * b
 
 # c
-def Fourier1DPolar(x_n):
-
-    return cartesianToPolar(Fourier1D(x_n))
+def Fourier1DPolar(Xn):
+    return cartesianToPolar(Fourier1D(Xn))
 
 
 # d
-def invFourier1DPolar(F_n_polar):
-
-    return invFourier1D(polarToCartes(F_n_polar))
+def invFourier1DPolar(FnPolar):
+    return invFourier1D(polarToCartes(FnPolar))
 
 
 # Task 3
