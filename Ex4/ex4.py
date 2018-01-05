@@ -59,6 +59,14 @@ def invFourier1D(F_n):
 
     return x_n_invFourier
 
+def polarToCartes(polar):
+    R = polar[:, 0]
+    t = polar[:, 1]
+    a = R * np.cos(t)
+    b = R * np.sin(t)
+
+    return a + 1j * b
+
 def cartesianToPolar(cartesian):
     real = np.real(cartesian)
     imag = np.imag(cartesian)
@@ -117,9 +125,7 @@ def imageUpsampling(img, upsamplingFactor):
     padWidth = np.array(((shape * upsamplingFactor) - shape) / 2.0, dtype=int)
     _, padWidth = np.meshgrid(padWidth, padWidth)
 
-    zeroPaddedFFT = np.lib.pad(shiftFFT,
-                               padWidth,
-                               'constant')
+    zeroPaddedFFT = np.lib.pad(shiftFFT, padWidth, 'constant')
     zeroPaddedFFT *= (upsamplingFactor[0] * upsamplingFactor[1])
 
     # Shift the High frequency components to the center and Low frequency components outside.
@@ -132,12 +138,51 @@ def imageUpsampling(img, upsamplingFactor):
 
 
 # Task 4
-def phaseCorr(img1, img2):
-    return 0
+def phaseCorr(ga, gb):
+    """
+    Implement an algorithm that finds a translation between two images sampled from an original
+    image. this, implement the phase-correlation algorithm which use the frequency domain to find
+    the translation in x, y between two images.
+    :param ga: first image to find correlation
+    :param gb: second image to find correlation
+    :return: the translation
+    """
+    # Calculate the discrete 2D Fourier transform of both images.
+    Ga = np.fft.fft2(ga)
+    Gb = np.fft.fft2(gb)
+
+    # Complex conjugate of the second result
+    GbStar = np.conjugate(Gb)
+
+    # Multiplying the Fourier transforms with that conjugate entry-wise (Hadamard product)
+    tmp = Ga * GbStar
+
+    # Normalizing the product
+    R = tmp / np.abs(tmp)
+
+    # Normalized cross-correlation by applying the inverse Fourier transform.
+    r = np.fft.ifft2(R)
+
+    # Determine the location of the peak in r.
+    index = np.argmax(r)
+    y = int(index / r.shape[1])
+    x = int(index % r.shape[1])
+    return x, y, r
 
 
 # Task 5
 def imFreqFilter(img, lowThresh, highThresh):
+    """
+    Implement a band-pass filtering function, that allow both high-pass, low-pass and band-pass
+    filtering in the frequency domain.
+    In case of low-pass filtering, the low-pass threshold should be 0, and in case of high-pass
+    filtering the high-pass threshold should be larger than the largest possible wavelength in
+    the image.
+    :param img: the original image
+    :param lowThresh: the low-pass threshold
+    :param highThresh: the high-pass threshold
+    :return: filtered Image, Fourier img, mask
+    """
     return 0
 
 
