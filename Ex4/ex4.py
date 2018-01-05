@@ -37,7 +37,7 @@ def invFourier1D(F_n):
     x_n_invFourier = np.ndarray(n, complex)
 
     # vector of the powers of the exponent
-    exponents = np.repeat(2 / n, n)
+    exponents = np.repeat(np.pi * 2 / n, n)
     k_nIndices = np.arange(n)
     exponents = np.multiply(exponents, k_nIndices)
 
@@ -48,8 +48,8 @@ def invFourier1D(F_n):
 
         # each element is the result of cos/sin on the exponent,
         # transformed the sin values to be imaginary
-        cosVals = np.cos(np.multiply(np.multiply(exponents, x), np.pi))
-        sinVals = np.sin(np.multiply(np.multiply(exponents, x), np.pi))
+        cosVals = np.cos(np.multiply(exponents, x))
+        sinVals = np.sin(np.multiply(exponents, x))
         sinVals = np.multiply(sinVals, 1j)
 
         cosVals = np.multiply(F_n, cosVals)
@@ -78,6 +78,14 @@ def cartesianToPolar(cartesian):
 
     return polar
 
+def polarToCartes(polar):
+    R = polar[:, 0]
+    t = polar[:, 1]
+    a = R * np.cos(t)
+    b = R * np.sin(t)
+
+    return a + 1j * b
+
 # c
 def Fourier1DPolar(x_n):
 
@@ -87,7 +95,7 @@ def Fourier1DPolar(x_n):
 # d
 def invFourier1DPolar(F_n_polar):
 
-    return cartesianToPolar(invFourier1D(F_n_polar))
+    return invFourier1D(polarToCartes(F_n_polar))
 
 
 # Task 3
