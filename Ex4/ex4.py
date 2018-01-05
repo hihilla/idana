@@ -175,8 +175,23 @@ def imFreqFilter(img, lowThresh, highThresh):
     :param highThresh: the high-pass threshold
     :return: filtered Image, Fourier img, mask
     """
-    return 0
+    Fimg = np.fft.fftshift(np.fft.fft2(img))
+    H = np.zeros(Fimg.shape)
 
+    # create martrix of distance from center
+    xBound, yBound = H.shape
+    xTmp = np.linspace(0, xBound, xBound) - xBound / 2.0
+    yTmp = np.linspace(0, yBound, yBound) - yBound / 2.0
+    us, vs = np.meshgrid(xTmp, yTmp)
+    distanceMatrix = np.sqrt(us ** 2 + vs ** 2)
+
+    # applying pass function over distance
+    H[np.logical_and(lowThresh <= distanceMatrix, distanceMatrix <= highThresh)] = 1
+
+    # applying mask over image
+    filteredImg = np.abs(np.fft.ifft2(Fimg * H))
+
+    return filteredImg, Fimg, H
 
 # d
 def imageDeconv(imgMotion, kernel_motion_blur, k):
