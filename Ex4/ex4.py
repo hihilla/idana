@@ -70,6 +70,14 @@ def cartesianToPolar(cartesian):
 
     return polar
 
+def polarToCartes(polar):
+    R = polar[:, 0]
+    t = polar[:, 1]
+    a = R * np.cos(t)
+    b = R * np.sin(t)
+
+    return a + 1j * b
+
 # c
 def Fourier1DPolar(x_n):
 
@@ -79,7 +87,7 @@ def Fourier1DPolar(x_n):
 # d
 def invFourier1DPolar(F_n_polar):
 
-    return cartesianToPolar(invFourier1D(F_n_polar))
+    return invFourier1D(polarToCartes(F_n_polar))
 
 
 # Task 3
