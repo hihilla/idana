@@ -5,8 +5,7 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 from scipy.signal import convolve2d
-
-
+from matplotlib.backends.backend_pdf import PdfPages
 import ex4
 
 # to get fixed set of random numbers
@@ -84,6 +83,64 @@ def test_5 (imageName, lowThresh,highThresh):
     ax4.imshow(filtImage, cmap='gray', vmin=0, vmax=255), ax4.set_title('Filtered image')
 
 
+def plotToPdf():
+    pp = PdfPages('ex4_5b.pdf')
+
+    fontSize = 10
+    imageName = './Images/cameraman.tif'
+    img = cv2.imread(imageName, cv2.IMREAD_GRAYSCALE)
+    lows = [0, 20, 10, 0, 5, 25]
+    highs = [15, 400, 50, 40, 400, 35]
+    titles = []
+
+    filtImages = []
+    for i in range(0, len(lows)):
+        low, high = lows[i], highs[i]
+        fImag, _, _ = ex4.imFreqFilter (img, low, high)
+        filtImages.append(fImag)
+        titles.append("low: " + str(low) + " high: " + str(high))
+
+    f, ((ax1, ax2, ax3), (ax4, ax5, ax6)) = plt.subplots(2, 3, sharex='col')
+    ax1.imshow(filtImages[0],
+               cmap='gray',
+               vmin=0,
+               vmax=255), ax1.set_title(titles[0],
+                                        fontsize=fontSize)
+    ax2.imshow(filtImages[1],
+               cmap='gray',
+               vmin=0,
+               vmax=255), ax2.set_title(titles[1],
+                                        fontsize=fontSize)
+    ax3.imshow(filtImages[2],
+               cmap='gray',
+               vmin=0,
+               vmax=255), ax3.set_title(titles[2],
+                                        fontsize=fontSize)
+    ax4.imshow(filtImages[3],
+               cmap='gray',
+               vmin=0,
+               vmax=255), ax4.set_title(titles[3],
+                                        fontsize=fontSize)
+    ax5.imshow(filtImages[4],
+               cmap='gray',
+               vmin=0,
+               vmax=255), ax5.set_title(titles[4],
+                                        fontsize=fontSize)
+    ax6.imshow(filtImages[5],
+               cmap='gray',
+               vmin=0,
+               vmax=255), ax6.set_title(titles[5],
+                                        fontsize=fontSize)
+
+    plt.subplots_adjust(top=0.92, bottom=0.08, left=0.10, right=0.95,
+                        hspace=0.25,
+                        wspace=0.35)
+    # plt.show()
+
+    pp.savefig()
+    pp.close()
+
+
 def test_5d1():
     
     # create motion degraded image 
@@ -135,44 +192,45 @@ def test_5d2():
     
 if __name__ == "__main__":
     
-#    # test 2 - 1D Fourier implementation
-    test_2ab()
-    test_2cd()
-   
-    #test 3 - image upsampling
-    imageName = './Images/cameraman.tif'
-    test_3(imageName, [2,2])
-    test_3(imageName, [3,2])
-    test_3(imageName, [2,4])
-    test_3(imageName, [0.5,0.5])
-    
-    # test 4 - phase correlation
-    test_4(10,5)
-    test_4(33, 27)
-    test_4(76, 100)
-    
-    # test 5
-    
-    # low pass filtering
-    lowThresh = 0
-    highThresh = 30
-    imageName = './Images/cameraman.tif'
-    test_5 (imageName, lowThresh,highThresh)
-    
-    # high pass filtering
-    lowThresh = 10
-    highThresh = 400
-    imageName = './Images/cameraman.tif'
-    test_5 (imageName, lowThresh,highThresh)
-    
-    # band pass filtering
-    lowThresh = 20
-    highThresh = 40
-    imageName = './Images/cameraman.tif'
-    test_5 (imageName, lowThresh,highThresh)
-    
-    # deconvolution
-    test_5d1()
-    
-    test_5d2()
+# #    # test 2 - 1D Fourier implementation
+#     test_2ab()
+#     test_2cd()
+#
+#     #test 3 - image upsampling
+#     imageName = './Images/cameraman.tif'
+#     test_3(imageName, [2,2])
+#     test_3(imageName, [3,2])
+#     test_3(imageName, [2,4])
+#     test_3(imageName, [0.5,0.5])
+#
+#     # test 4 - phase correlation
+#     test_4(10,5)
+#     test_4(33, 27)
+#     test_4(76, 100)
+#
+#     # test 5
+#
+#     # low pass filtering
+#     lowThresh = 0
+#     highThresh = 30
+#     imageName = './Images/cameraman.tif'
+#     test_5 (imageName, lowThresh,highThresh)
+#
+#     # high pass filtering
+#     lowThresh = 10
+#     highThresh = 400
+#     imageName = './Images/cameraman.tif'
+#     test_5 (imageName, lowThresh,highThresh)
+#
+#     # band pass filtering
+#     lowThresh = 20
+#     highThresh = 40
+#     imageName = './Images/cameraman.tif'
+#     test_5 (imageName, lowThresh,highThresh)
+#
+#     # deconvolution
+#     test_5d1()
+#
+#     test_5d2()
+    plotToPdf()
    
