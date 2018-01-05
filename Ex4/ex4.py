@@ -113,7 +113,6 @@ def imageUpsampling(img, upsamplingFactor):
     invShift = np.fft.ifftshift(zeroPaddedFFT)
 
     # Perform Inverse Fast Fourier Transform
-    # upsampledImg = np.array(np.fft.ifft2(invShift).real, dtype=int)
     upsampledImg = np.abs(np.fft.ifft2(invShift))
     return upsampledImg, shiftFFT, zeroPaddedFFT
 
@@ -152,6 +151,7 @@ def phaseCorr(ga, gb):
 
 
 # Task 5
+# a
 def imFreqFilter(img, lowThresh, highThresh):
     """
     Implement a band-pass filtering function, that allow both high-pass, low-pass and band-pass
