@@ -184,9 +184,12 @@ def imFreqFilter(img, lowThresh, highThresh):
     return filteredImg, Fimg, H
 
 # d
-def imageDeconv(imgMotion, kernel_motion_blur, k):
-    return 0
-
-
-def imageDeconv(imgEcho, kernel_echo_blur, k):
+def imageDeconv(img, kernel, k):
+    """
+    Implement the Weiner filter for image restoration.
+    :param img: the degraded image
+    :param kernel: the convolution kernel used to degrade the image
+    :param k: the lambda parameter to avoid dividing by zero
+    :return: the restored image
+    """
     return 0

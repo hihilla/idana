@@ -92,7 +92,6 @@ def plotToPdf():
     lows = [0, 20, 10, 0, 5, 25]
     highs = [15, 400, 50, 40, 400, 35]
     titles = []
-
     filtImages = []
     for i in range(0, len(lows)):
         low, high = lows[i], highs[i]
