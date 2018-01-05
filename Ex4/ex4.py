@@ -139,9 +139,6 @@ def phaseCorr(ga, gb):
     :param gb: second image to find correlation
     :return: the translation
     """
-    # You can ignore the first step (application of Hamming window) in your implementation.
-    # You do not need to consider sub-pixel translations or any rotations.
-
     # Calculate the discrete 2D Fourier transform of both images.
     Ga = np.fft.fft2(ga)
     Gb = np.fft.fft2(gb)
@@ -167,6 +164,17 @@ def phaseCorr(ga, gb):
 
 # Task 5
 def imFreqFilter(img, lowThresh, highThresh):
+    """
+    Implement a band-pass filtering function, that allow both high-pass, low-pass and band-pass
+    filtering in the frequency domain.
+    In case of low-pass filtering, the low-pass threshold should be 0, and in case of high-pass
+    filtering the high-pass threshold should be larger than the largest possible wavelength in
+    the image.
+    :param img: the original image
+    :param lowThresh: the low-pass threshold
+    :param highThresh: the high-pass threshold
+    :return: filtered Image, Fourier img, mask
+    """
     return 0
 
 
