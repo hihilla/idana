@@ -130,16 +130,39 @@ def imageUpsampling(img, upsamplingFactor):
 
 
 # Task 4
-def phaseCorr(img1, img2):
+def phaseCorr(ga, gb):
     """
     Implement an algorithm that finds a translation between two images sampled from an original
     image. this, implement the phase-correlation algorithm which use the frequency domain to find
     the translation in x, y between two images.
-    :param img1:
-    :param img2:
-    :return:
+    :param ga: first image to find correlation
+    :param gb: second image to find correlation
+    :return: the translation
     """
-    return 0
+    # You can ignore the first step (application of Hamming window) in your implementation.
+    # You do not need to consider sub-pixel translations or any rotations.
+
+    # Calculate the discrete 2D Fourier transform of both images.
+    Ga = np.fft.fft2(ga)
+    Gb = np.fft.fft2(gb)
+
+    # Complex conjugate of the second result
+    GbStar = np.conjugate(Gb)
+
+    # Multiplying the Fourier transforms with that conjugate entry-wise (Hadamard product)
+    tmp = Ga * GbStar
+
+    # Normalizing the product
+    R = tmp / np.abs(tmp)
+
+    # Normalized cross-correlation by applying the inverse Fourier transform.
+    r = np.fft.ifft2(R)
+
+    # Determine the location of the peak in r.
+    index = np.argmax(r)
+    y = int(index / r.shape[1])
+    x = int(index % r.shape[1])
+    return x, y, r
 
 
 # Task 5
