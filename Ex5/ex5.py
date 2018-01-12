@@ -23,7 +23,8 @@ def reduce(img, filterParam):
     # convolution between image and kernel to reduce image by 1/2 (same dim as image)
     convoluted = convolve2d(img, kernel, "same")#imConv2(img, kernel)
     # take second pixel
-    return convoluted[::2, ::2]
+    convoluted = convoluted[::2, ::2]
+    return np.array(convoluted, dtype=int)
 
 
 # bonus
@@ -48,12 +49,12 @@ def laplacianPyramid(img, numOfLevels, filterParam):
         Gi = G[i]
         expandedGi1 = expand(G[i + 1], filterParam)
         # make sure they are of the same damnation
-        if Gi.shape[0] > expandedGi1.shape[0]:
+        if expandedGi1.shape[0] > Gi.shape[0]:
             # need to remove a row from expandedGi1 to make dimensions equal
             # expandedGi1 = np.delete(expandedGi1, -1, axis=0)
             zeros = np.array([np.zeros(Gi.shape[1], dtype=Gi.dtype)])
             expandedGi1 = np.concatenate((expandedGi1, zeros), axis=0)
-        elif Gi.shape[1] > expandedGi1.shape[1]:
+        elif expandedGi1.shape[1] > Gi.shape[1]:
             # need to remove a column from expandedGi1 to make dimensions equal
             # expandedGi1 = np.delete(expandedGi1, -1, axis=1)
             zeros = np.array([np.zeros(Gi.shape[0], dtype=Gi.dtype)])
@@ -71,25 +72,24 @@ def expand(img, filterParam):
     newShape = (img.shape[0] * 2, img.shape[1] * 2)
     expandedImg = np.zeros(newShape, dtype=img.dtype)
     expandedImg[::2, ::2] = img[:, :]
-    return 4 * convolve2d(expandedImg, kernel, "same")
-
+    return np.array(4 * convolve2d(expandedImg, kernel, "same"), dtype=int)
 
 # b
 def imgFromLaplacianPyramid(laplacPrmd, numOfLevels, filterParam):
     # take L[i], expand it, add to L[i - 1]
-    outImg = np.zeros(laplacPrmd[0].shape, dtype=laplacPrmd[0].dtype)
+    outImg = np.zeros(laplacPrmd[0].shape)
     for i in np.arange(numOfLevels - 1, 0, -1):
         Li = expand(laplacPrmd[i], filterParam)
         Li1 = laplacPrmd[i - 1]
         # make sure they are of the same damnation
         if Li.shape[0] > Li1.shape[0]:
-            zeros = np.array([np.zeros(Li.shape[1], dtype=Li.dtype)])
-            Li1 = np.concatenate((Li1, zeros), axis=0)
-            # Li = np.delete(Li, -1, axis=0)
+            # zeros = np.array([np.zeros(Li.shape[1], dtype=Li.dtype)])
+            # Li1 = np.concatenate((Li1, zeros), axis=0)
+            Li = np.delete(Li, -1, axis=0)
         elif Li.shape[1] > Li1.shape[1]:
-            zeros = np.array([np.zeros(Li.shape[0], dtype=Li.dtype)])
-            Li1 = np.concatenate((Li1, zeros), axis=1)
-            # Li = np.delete(Li, -1, axis=1)
+            # zeros = np.array([np.zeros(Li.shape[0], dtype=Li.dtype)])
+            # Li1 = np.concatenate((Li1, zeros), axis=1)
+            Li = np.delete(Li, -1, axis=1)
         outImg = Li + Li1
         laplacPrmd[i - 1] = outImg
     return outImg
@@ -100,13 +100,12 @@ def imgBlending(img1, img2, blendingMask, numOfLevels, filterParam):
     # Build Laplacian pyramids LA and LB from images A and B
     LA = laplacianPyramid(img1, numOfLevels, filterParam)
     LB = laplacianPyramid(img2, numOfLevels, filterParam)
-    #  Build a Gaussian pyramid GR from selected region R (mask)
-    GR = gaussianPyramid(blendingMask, numOfLevels, filterParam)
-    #  Form a combined pyramid LS from LA and LB using nodes of GR as weights
-    # LS(i,j) = GR(I,j,)*LA(I,j) + (1-GR(I,j))*LB(I,j)
+    #  Build a Gaussian pyramid GM from selected mask
+    GM = gaussianPyramid(blendingMask, numOfLevels, filterParam)
+    #  Form a combined pyramid LS from LA and LB using nodes of GM as weights
     LS = {}
     for key in LA.keys():
-        LS[key] = GR[key] * LA[key] + (1 - GR[key]) * LB[key]
+        LS[key] = GM[key] * LA[key] + (1 - GM[key]) * LB[key]
     # Collapse the LS pyramid to get the final blended image
     blendImg = imgFromLaplacianPyramid(LS, numOfLevels, filterParam)
     return blendImg
