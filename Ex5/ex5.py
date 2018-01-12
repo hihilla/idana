@@ -21,7 +21,7 @@ def reduce(img, filterParam):
     # reduce image by convolution with gaussian filter
     kernel = getKernel(filterParam)
     # convolution between image and kernel to reduce image by 1/2 (same dim as image)
-    convoluted = imConv2(img, kernel)#convolve2d(img, kernel, "same")
+    convoluted = convolve2d(img, kernel, "same")#imConv2(img, kernel)
     # take second pixel
     return convoluted[::2, ::2]
 
@@ -97,4 +97,16 @@ def imgFromLaplacianPyramid(laplacPrmd, numOfLevels, filterParam):
 
 # Task 3: Image blending
 def imgBlending(img1, img2, blendingMask, numOfLevels, filterParam):
-    return 0
+    # Build Laplacian pyramids LA and LB from images A and B
+    LA = laplacianPyramid(img1, numOfLevels, filterParam)
+    LB = laplacianPyramid(img2, numOfLevels, filterParam)
+    #  Build a Gaussian pyramid GR from selected region R (mask)
+    GR = gaussianPyramid(blendingMask, numOfLevels, filterParam)
+    #  Form a combined pyramid LS from LA and LB using nodes of GR as weights
+    # LS(i,j) = GR(I,j,)*LA(I,j) + (1-GR(I,j))*LB(I,j)
+    LS = {}
+    for key in LA.keys():
+        LS[key] = GR[key] * LA[key] + (1 - GR[key]) * LB[key]
+    # Collapse the LS pyramid to get the final blended image
+    blendImg = imgFromLaplacianPyramid(LS, numOfLevels, filterParam)
+    return blendImg
