@@ -21,7 +21,7 @@ def getKernel(filterParam):
 
 def reduce(image, filterParam):
     kernel = getKernel(filterParam)
-    newImage = convolve2d(image, kernel, 'same')
+    newImage = imConv2(image, kernel)
     # returns only every second pixel of the image after convolution
     return newImage[::2, ::2]
 
@@ -68,7 +68,7 @@ def expand(image, filterParam):
     newImage = np.zeros((image.shape[0] * 2, image.shape[1] * 2))
     newImage[::2, ::2] = image[:, :]
     # multiply by 4 to normalize after kernel (divides by 4)
-    newImage = 4 * convolve2d(newImage, kernel, 'same')
+    newImage = 4 * imConv2(newImage, kernel)
     return np.array(newImage, dtype=int)
 
 
