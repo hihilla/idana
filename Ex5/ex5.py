@@ -23,7 +23,7 @@ def reduce(image, filterParam):
     kernel = getKernel(filterParam)
     newImage = convolve2d(image, kernel, 'same')
     # returns only every second pixel of the image after convolution
-    return np.array(newImage[::2, ::2], dtype=int)
+    return newImage[::2, ::2]
 
 
 # bonus
