@@ -30,8 +30,31 @@ def imConv2(img, kernel1D):
 # Task 2: Laplacian pyramid
 # a
 def laplacianPyramid(img, numOfLevels, filterParam):
-    return 0
+    G = gaussianPyramid(img, numOfLevels, filterParam)
+    L = {}
+    for i in np.arange(0, numOfLevels - 1):
+        Gi = G[i]
+        expandedGi1 = expand(G[i + 1], filterParam)
+        # make sure they are of the same damnation
+        if Gi.shape[0] > expandedGi1.shape[0]:
+            # need to remove a row from expandedGi1 to make dimensions equal
+            expandedGi1 = np.delete(expandedGi1, -1, axis=0)
+        elif Gi.shape[1] > expandedGi1.shape[1]:
+            # need to remove a column from expandedGi1 to make dimensions equal
+            expandedGi1 = np.delete(expandedGi1, -1, axis=1)
+        L[i] = Gi - expandedGi1
+    L[numOfLevels - 1] = G[numOfLevels - 1]
+    return L
 
+def expand(img, filterParam):
+    # expand image by convolution with gaussian filter
+    kernel = generate5x5Kernel(filterParam)
+    # create an image twice as big, each second pixel is from original image,
+    # using convolution with gaussian
+    newShape = (img.shape[0] * 2, img.shape[1] * 2)
+    expandedImg = np.zeros(newShape, dtype=img.dtype)
+    expandedImg[::2, ::2] = img[:, :]
+    return 4 * convolve2d(expandedImg, kernel, "same")
 
 # b
 def imgFromLaplacianPyramid(l_pyr, numOfLevels, filterParam):
