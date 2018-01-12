@@ -57,8 +57,20 @@ def expand(img, filterParam):
     return 4 * convolve2d(expandedImg, kernel, "same")
 
 # b
-def imgFromLaplacianPyramid(l_pyr, numOfLevels, filterParam):
-    return 0
+def imgFromLaplacianPyramid(laplacPrmd, numOfLevels, filterParam):
+    # take L[i], expand it, add to L[i - 1]
+    outImg = np.zeros(laplacPrmd[0].shape, dtype=laplacPrmd[0].dtype)
+    for i in np.arange(numOfLevels - 1, 0, -1):
+        Li = expand(laplacPrmd[i], filterParam)
+        Li1 = laplacPrmd[i - 1]
+        # make sure they are of the same damnation
+        if Li.shape[0] > Li1.shape[0]:
+            Li = np.delete(Li, -1, axis=0)
+        elif Li.shape[1] > Li1.shape[1]:
+            Li = np.delete(Li, -1, axis=1)
+        outImg = Li + Li1
+        laplacPrmd[i - 1] = outImg
+    return outImg
 
 
 # Task 3: Image blending
