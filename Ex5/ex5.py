@@ -8,13 +8,13 @@ def gaussianPyramid(img, numOfLevels, filterParam=0.4):
     for i in range(1, numOfLevels):
         # every entry of dict is the previous after reduce function
         newImage = reduce(G[i - 1], filterParam)
-        G[i] = newImage
+        G[i] = np.array(newImage, dtype=int)
 
     return G
 
 
 def genreateKernel(a):
-    weightsOneDim = np.array([0.25 - a / 2.0, 0.25, a , 0.25, 0.25 - a / 2.0])
+    weightsOneDim = np.array([0.25 - a / 2.0, 0.25, a, 0.25, 0.25 - a / 2.0])
     weights = np.outer(weightsOneDim, weightsOneDim)
 
     return weights
@@ -23,7 +23,7 @@ def genreateKernel(a):
 def reduce(image, filterParam):
     kernel = genreateKernel(filterParam)
     newImage = convolve2d(image, kernel, 'same')
-    # returns only every second pixel of the image after convelution
+    # returns only every second pixel of the image after convolution
     return newImage[::2, ::2]
 
 
@@ -74,13 +74,22 @@ def expand(image, filterParam):
 # b
 def imgFromLaplacianPyramid(l_pyr, numOfLevels, filterParam=0.4):
     # creates the size of the final image to be returned
-    image = np.zeros(l_pyr[0].shape[0], l_pyr[1].shape[1])
+    image = np.zeros((l_pyr[0].shape[0], l_pyr[0].shape[1]), dtype=float)
 
     for i in range(numOfLevels - 1, 0, -1):
-        laplacExpanded = expand(l_pyr[i])
-        reconstructedLevel = l_pyr[i - 1] + laplacExpanded
+        laplacExpanded = expand(l_pyr[i], filterParam)
+        laplacPrev = l_pyr[i - 1]
+        # fixes the expanded to be as the size of the previous
+        # level of the pyramid for future valid summary
+        if laplacExpanded.shape[0] > laplacPrev.shape[0]:
+            laplacExpanded = np.delete(laplacExpanded, 0, axis=0)
+        if laplacExpanded.shape[1] > laplacPrev.shape[1]:
+            laplacExpanded = np.delete(laplacExpanded, 0, axis=1)
+        reconstructedLevel = laplacPrev + laplacExpanded
+        l_pyr[i - 1] = reconstructedLevel
+        image = reconstructedLevel
 
-    return 0
+    return image
 
 
 # Task 3: Image blending
