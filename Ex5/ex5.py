@@ -5,10 +5,12 @@ import scipy.signal.convolve2d as conv
 def gaussianPyramid(img, numOfLevels, filterParam):
     return 0
 
-def generate5x5Kernel(a):
-    kernelVector = [0.25 - a/2.0, 0.25, a, 0.25, 0.25 - a/2.0]
+def generate5x5Kernel(filterParam):
+    kernelVector = [0.25 - filterParam / 2.0, 0.25, filterParam, 0.25, 0.25 - filterParam / 2.0]
     kernelVector = np.array(kernelVector)
     np.outer(kernelVector, kernelVector)
+
+def reduce
 
 # bonus
 def imConv2(img, kernel1D):
