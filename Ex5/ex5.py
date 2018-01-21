@@ -16,6 +16,11 @@ def getKernel(filterParam):
     return np.array([0.25 - filterParam / 2.0, 0.25, filterParam, 0.25, 0.25 - filterParam / 2.0])
 
 
+def getKernel2d(filterParam):
+    vector = getKernel(filterParam)
+    return np.outer(vector, vector)
+
+
 def reduce(image, filterParam):
     kernel = getKernel(filterParam)
     # taking only every second pixel of the image after convolution
