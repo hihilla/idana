@@ -3,7 +3,7 @@ from scipy.signal import convolve2d
 
 
 # Task 1: Gaussian pyramid
-def gaussianPyramid(img, numOfLevels, filterParam=0.4):
+def gaussianPyramid(img, numOfLevels, filterParam):
     G = {0: img}
     for i in range(1, numOfLevels):
         # every entry of dict is the previous after reduce function
@@ -13,30 +13,37 @@ def gaussianPyramid(img, numOfLevels, filterParam=0.4):
 
 def getKernel(filterParam):
     # using gaussian weights
-    weights1D = np.array(
-        [0.25 - filterParam / 2.0, 0.25, filterParam, 0.25, 0.25 - filterParam / 2.0])
-    weights = np.outer(weights1D, weights1D)
-    return weights
+    return np.array([0.25 - filterParam / 2.0, 0.25, filterParam, 0.25, 0.25 - filterParam / 2.0])
 
 
 def reduce(image, filterParam):
     kernel = getKernel(filterParam)
+    # taking only every second pixel of the image after convolution
     newImage = imConv2(image, kernel)
-    # returns only every second pixel of the image after convolution
-    return newImage[::2, ::2]
+    newImage = np.array(newImage[::2, ::2])
+    return newImage
 
 
 # bonus
 def imConv2(img, kernel1D):
-    Fimg = np.fft.rfft2(img)
-    Fkernel = np.fft.rfft2(kernel1D, img.shape)
-    # convolution in spatial domain = multiply in frequency domain
-    conv = np.fft.irfft2(Fimg * Fkernel).real
-    # fix shift
-    kernelShape = kernel1D.shape
-    conv = np.roll(conv, int(kernelShape[0] / -2.0), 0)
-    conv = np.roll(conv, int(kernelShape[0] / -2.0), 1)
-    return conv
+    padding = int(kernel1D.shape[0] / 2.0)
+    # adding padding to avoid overflow
+    imgPad = np.pad(img, padding, 'constant')
+
+    tempResX = np.zeros(imgPad.shape)
+    tempResY = np.zeros(imgPad.shape)
+
+    # separate convolution to rows and columns
+    for i in np.arange(0, kernel1D.shape[0]):
+        window = imgPad[:, i:imgPad.shape[0] - 2 * padding + i]
+        tempResY[:, padding:-padding] = tempResY[:, padding:-padding] + window * kernel1D[i]
+
+    for i in np.arange(0, kernel1D.shape[0]):
+        window = tempResY[i:imgPad.shape[1] - 2 * padding + i, :]
+        tempResX[padding:-padding, :] = tempResX[padding:-padding, :] + window * kernel1D[i]
+
+    # ignoring zero padding
+    return tempResX[padding:img.shape[0] + padding, padding:img.shape[1] + padding]
 
 
 # Task 2: Laplacian pyramid
