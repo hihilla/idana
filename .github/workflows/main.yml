@@ -18,8 +18,9 @@ jobs:
       - name: Get release id
         id: get-release-id
         run: |
-          export UPLOAD_URL=$(curl "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/t0.0.1" | jq .upload_url) &&
-          echo "UPLOAD_URL=${UPLOAD_URL}" >> $GITHUB_ENV
+          export UPLOAD_URL=$(curl "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/t0.0.1" | jq .assets_url) &&
+          echo "UPLOAD_URL=${UPLOAD_URL}" >> $GITHUB_ENV &&
+          echo "UPLOAD_URL=${UPLOAD_URL}"
         shell: bash
       - name: Upload assets
         uses: actions/upload-release-asset@v1
