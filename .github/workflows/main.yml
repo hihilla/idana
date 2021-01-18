@@ -23,6 +23,8 @@ jobs:
         shell: bash
       - name: Upload assets
         uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}/assets
           asset_path: Ex0/Figure_1.png
