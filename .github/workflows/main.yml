@@ -13,7 +13,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: print stuff
-        run: echo $GITHUB_REF
+        run: echo $GITHUB_REF && echo $FFF
       - name: Upload assets
         uses: actions/upload-release-asset@v1
         env:
