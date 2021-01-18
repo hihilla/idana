@@ -1,12 +1,7 @@
 on:
-  push:
-    branches:
-      - master
-    tags:
-      - v*
-  pull_request:
-    branches:
-      - master
+  release:
+    types:
+      - created
 
 jobs:
   Publish2: #    REMOVE THIS
@@ -15,19 +10,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Get release id
-        id: get-release-id
-        run: |
-          export UPLOAD_URL=$(curl "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/t0.0.1" | jq .upload_url) &&
-          echo "UPLOAD_URL=${UPLOAD_URL}" >> $GITHUB_ENV &&
-          echo "UPLOAD_URL=${UPLOAD_URL}"
-        shell: bash
       - name: Upload assets
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: "${{ env.UPLOAD_URL }}"
+          upload_url: ${{ github.event.release.upload_url }}
           asset_path: Ex0/Figure_1.png
           asset_name: Fig_1.png
           asset_content_type: image/png
