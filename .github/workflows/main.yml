@@ -18,10 +18,9 @@ jobs:
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          filename: "Ex0/${{env.FFF}}_1.png"
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ${{ env.filename }}
-          asset_name: Fig_1.png
+          asset_path: "Ex0/${{env.FFF}}_1.png"
+          asset_name: ${{env.FFF}}_1.png
           asset_content_type: image/png
 
