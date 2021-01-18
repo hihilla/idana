@@ -18,7 +18,7 @@ jobs:
       - name: Get release id
         id: get-release-id
         run: |
-          export UPLOAD_URL=$(curl "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/t0.0.1" | jq .id) &&
+          export UPLOAD_URL=$(curl "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/t0.0.1" | jq .upload_url) &&
           echo "UPLOAD_URL=${UPLOAD_URL}" >> $GITHUB_ENV &&
           echo "UPLOAD_URL=${UPLOAD_URL}"
         shell: bash
@@ -27,7 +27,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: "https://uploads.github.com/repos/${{ github.repository }}/releases/${{ env.UPLOAD_URL }}/assets"
+          upload_url: "${{ env.UPLOAD_URL }}"
           asset_path: Ex0/Figure_1.png
           asset_name: Fig_1.png
           asset_content_type: image/png
