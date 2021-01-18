@@ -26,7 +26,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: "https://api.github.com/repos/${{ env.GITHUB_REPOSITORY }}/releases/${{ env.RELEASE_ID }}/assets"
+          upload_url: "https://api.github.com/repos/${{ github.repository }}/releases/${{ env.RELEASE_ID }}/assets"
           asset_path: Ex0/Figure_1.png
           asset_name: Fig_1.png
           asset_content_type: image/png
