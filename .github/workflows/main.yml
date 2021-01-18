@@ -1,0 +1,31 @@
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - v*
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  Publish2: #    REMOVE THIS
+    runs-on: ubuntu-latest
+    name: Publish2
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Get release id
+        id: get-release-id
+        run: |
+          export RELEASE_ID=$(curl "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/t0.0.1" | jq .id) &&
+          echo "RELEASE_ID=${RELEASE_ID}" >> $GITHUB_ENV
+        shell: bash
+      - name: Upload assets
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}/assets
+          assets_path: Ex0/Figure_1.png
+          asset_name: Fig_1.png
+          asset_content_type: image/png
+
