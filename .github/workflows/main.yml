@@ -9,6 +9,7 @@ jobs:
     name: Publish2
     steps:
       - run: echo SOURCE_TAG=${GITHUB_REF#refs/tags/} >> $GITHUB_ENV
+      - run: echo FFF=Figure >> $GITHUB_ENV
       - name: Checkout code
         uses: actions/checkout@v2
       - name: print stuff
@@ -19,7 +20,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: Ex0/Figure_1.png
+          asset_path: "Ex0/${FFF}_1.png"
           asset_name: Fig_1.png
           asset_content_type: image/png
 
