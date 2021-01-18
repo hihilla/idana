@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Publish2
     steps:
+      - run: echo SOURCE_TAG=${GITHUB_REF#refs/tags/} >> $GITHUB_ENV
       - name: Checkout code
         uses: actions/checkout@v2
       - name: print stuff
